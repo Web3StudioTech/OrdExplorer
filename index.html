@@ -15,7 +15,7 @@
   --border:#2a1f4a;
   --border2:#3d2d6b;
   --accent:#f7931a;
-  --accent2:#ff6bff;
+  --accent2:#00d4ff;
   --accent3:#00f5ff;
   --accent4:#39ff14;
   --text:#f0e8ff;
@@ -90,7 +90,7 @@ iframe{border:none;display:block}
 }
 #logo-icon{
   width:36px;height:36px;border-radius:10px;
-  background:linear-gradient(135deg,#f7931a,#ff6bff);
+  background:linear-gradient(135deg,#f7931a,#e07b0a);
   display:flex;align-items:center;justify-content:center;
   font-size:18px;font-weight:900;color:#000;
   box-shadow:0 0 16px rgba(247,147,26,0.5);
@@ -133,7 +133,7 @@ iframe{border:none;display:block}
   height:36px;width:230px;gap:8px;
   transition:border-color .15s;
 }
-#nav-search:focus-within{border-color:var(--accent2)}
+#nav-search:focus-within{border-color:var(--accent)}
 #sq{
   background:none;border:none;
   color:var(--text);font-size:12px;
@@ -142,7 +142,7 @@ iframe{border:none;display:block}
 #sq::placeholder{color:var(--text3)}
 #wb{
   padding:7px 16px;border-radius:10px;
-  background:linear-gradient(135deg,var(--accent),#ff6bff);
+  background:linear-gradient(135deg,var(--accent),#e07b0a);
   border:none;color:#000;font-size:12px;font-weight:900;
   cursor:pointer;white-space:nowrap;
   transition:transform .15s,box-shadow .15s;
@@ -190,7 +190,7 @@ iframe{border:none;display:block}
   box-shadow:0 0 10px rgba(247,147,26,0.2);
 }
 .tab:hover:not(.on){border-color:var(--border2);color:var(--text)}
-.tab-gif.on{border-color:var(--accent2);background:rgba(255,107,255,0.12);color:var(--accent2);box-shadow:0 0 10px rgba(255,107,255,0.2)}
+.tab-gif.on{border-color:#00d4ff;background:rgba(0,212,255,0.1);color:#00d4ff;box-shadow:0 0 10px rgba(0,212,255,0.2)}
 .tab-html.on{border-color:var(--accent3);background:rgba(0,245,255,0.1);color:var(--accent3);box-shadow:0 0 10px rgba(0,245,255,0.2)}
 .tab-game.on{border-color:var(--accent4);background:rgba(57,255,20,0.1);color:var(--accent4);box-shadow:0 0 10px rgba(57,255,20,0.2)}
 .tab-bitmap.on{border-color:#fbbf24;background:rgba(251,191,36,0.12);color:#fbbf24;box-shadow:0 0 10px rgba(251,191,36,0.2)}
@@ -227,7 +227,7 @@ iframe{border:none;display:block}
   font-family:var(--font-body);font-weight:700;
   transition:border-color .14s;
 }
-.range-in:focus{border-color:var(--accent2)}
+.range-in:focus{border-color:var(--accent)}
 .go-btn{
   padding:3px 10px;border-radius:6px;
   font-size:10px;font-weight:800;
@@ -311,7 +311,7 @@ iframe{border:none;display:block}
 .btn-primary{
   padding:9px 20px;border-radius:10px;
   font-size:13px;font-weight:800;
-  background:linear-gradient(135deg,var(--accent),#ff6bff);
+  background:linear-gradient(135deg,var(--accent),#e07b0a);
   border:none;color:#000;cursor:pointer;
   transition:transform .15s,box-shadow .15s;
   font-family:var(--font-body);letter-spacing:.5px;
@@ -466,7 +466,7 @@ iframe{border:none;display:block}
   letter-spacing:.5px;
 }
 .trend-btn.on{
-  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  background:linear-gradient(135deg,var(--accent),#e07b0a);
   color:#000;box-shadow:0 0 10px rgba(247,147,26,0.4);
 }
 
@@ -478,8 +478,8 @@ iframe{border:none;display:block}
 }
 .col-card:hover{
   transform:translateY(-5px) rotate(0.5deg);
-  border-color:var(--accent2);
-  box-shadow:0 14px 40px rgba(255,107,255,0.15);
+  border-color:var(--accent);
+  box-shadow:0 14px 40px rgba(247,147,26,0.12);
 }
 
 /* RUNE CARD */
@@ -793,33 +793,85 @@ function bisRangeParam(){
 function fetchFeed(off,ct){
   var CT=getCT(ct);
   var mimes=CT.mime||null;
+  var sortOrder=(ST.sort==='oldest'?'asc':'desc');
+  var sortBy=(ST.sort==='rare'?'sat_rarity':'inscr_num');
 
+  // ── BITMAP: dedicated BIS endpoint ──────────────────────────────────────
   if(ct==='bitmap'){
-    return apiFetch(BIS+'/bitmap/all?offset='+off+'&count=24&order='+(ST.sort==='oldest'?'asc':'desc'))
+    return apiFetch(BIS+'/bitmap/all?offset='+off+'&count=24&order='+sortOrder)
       .then(function(d){
         var r=(d.data||[]).map(function(b){
           var id=b.inscription_id||'';
           return{id:id,number:b.inscription_number||0,content_type:'text/plain',
-            content_length:0,genesis_block_height:b.genesis_height||0,genesis_timestamp:b.genesis_ts||null,
-            sat_rarity:b.sat_rarity||'common',sat_name:'',address:b.owner_wallet_addr||'',
-            value:546,collection_name:'',collection_slug:'',title:b.bitmap_number!=null?b.bitmap_number+'.bitmap':'',
-            parent:'',children:[],preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
-            genesis_tx:(id||'').replace(/i\d+$/,''),_bitmap:b.bitmap_number,_src:'bis'};
+            content_length:0,genesis_block_height:b.genesis_height||0,
+            genesis_timestamp:b.genesis_ts||null,sat_rarity:b.sat_rarity||'common',
+            sat_name:'',address:b.owner_wallet_addr||'',value:546,
+            collection_name:'',collection_slug:'',
+            title:b.bitmap_number!=null?b.bitmap_number+'.bitmap':'',
+            parent:'',children:[],
+            preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
+            genesis_tx:(id||'').replace(/i\d+$/,''),
+            _bitmap:b.bitmap_number,_src:'bis'};
         }).filter(Boolean);
         if(r.length)return{r:r,src:'BestInSlot (Bitmap)',err:null};
         throw new Error('empty');
       }).catch(function(){return seedFallback(off);});
   }
+
+  // ── PARENTS: has_children flag ───────────────────────────────────────────
   if(ct==='parent'){
-    return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24&has_children=true'+bisSortParam()+bisRangeParam())
+    return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24&has_children=true&sort_by='+sortBy+'&order='+sortOrder+bisRangeParam())
       .then(function(d){
         var r=(d.data||[]).map(nBIS).filter(Boolean);
         if(r.length)return{r:r,src:'BestInSlot (Parents)',err:null};
         throw new Error('empty');
       }).catch(function(){return seedFallback(off);});
   }
+
+  // ── ALL: use proxy → ordinals.com (unfiltered latest) ───────────────────
+  if(ct==='all'){
+    var proxyPage=Math.floor(off/20);
+    var proxyPath='/inscriptions'+(proxyPage>0?'/'+proxyPage:'');
+    return apiFetch(PROXY+proxyPath)
+      .then(function(d){
+        var ids=d.inscriptions||[];
+        if(!ids.length)throw new Error('empty');
+        var r=ids.slice(0,24).map(function(id){
+          return{id:id,number:0,content_type:'',content_length:0,
+            genesis_block_height:0,genesis_timestamp:null,
+            sat_rarity:'common',sat_name:'',address:'',value:546,
+            collection_name:'',collection_slug:'',title:'',parent:'',children:[],
+            preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
+            genesis_tx:id.replace(/i\d+$/,''),_ord:true};
+        });
+        return{r:r,src:'ordinals.com (live)',err:null};
+      }).catch(function(){
+        // Fallback to BIS unfiltered
+        return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24&sort_by='+sortBy+'&order='+sortOrder)
+          .then(function(d){
+            var r=(d.data||[]).map(nBIS).filter(Boolean);
+            if(r.length)return{r:r,src:'BestInSlot',err:null};
+            throw new Error('empty');
+          }).catch(function(){return seedFallback(off);});
+      });
+  }
+
+  // ── ALL OTHER TYPES: route to BestInSlot with MIME filter ────────────────
+  // This ensures Videos show ONLY videos, Text shows ONLY text, etc.
+  var mimeList = mimes ? mimes.split(',') : [];
+
+  // Build multiple requests for multi-MIME types (e.g. Videos = mp4 + webm)
+  function fetchWithMime(mimeType){
+    var url=BIS+'/inscription/all?offset='+off+'&count=24&sort_by='+sortBy+'&order='+sortOrder
+      +'&mime_type='+encodeURIComponent(mimeType)+bisRangeParam();
+    return apiFetch(url).then(function(d){
+      return (d.data||[]).map(nBIS).filter(Boolean);
+    });
+  }
+
+  // For game: HTML inscriptions (BIS doesn't have is_game filter reliably)
   if(ct==='game'){
-    return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24&mime_type=text%2Fhtml'+bisSortParam())
+    return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24&sort_by='+sortBy+'&order='+sortOrder+'&mime_type=text%2Fhtml'+bisRangeParam())
       .then(function(d){
         var r=(d.data||[]).map(nBIS).filter(Boolean);
         if(r.length)return{r:r,src:'BestInSlot (HTML/Games)',err:null};
@@ -827,34 +879,28 @@ function fetchFeed(off,ct){
       }).catch(function(){return seedFallback(off);});
   }
 
-  var proxyPage=Math.floor(off/20);
-  return apiFetch(PROXY+'/inscriptions'+(proxyPage>0?'/'+proxyPage:''))
-    .then(function(d){
-      var ids=d.inscriptions||[];
-      if(!ids.length)throw new Error('empty');
-      var r=ids.slice(0,24).map(function(id){
-        return{id:id,number:0,content_type:'',content_length:0,genesis_block_height:0,
-          genesis_timestamp:null,sat_rarity:'common',sat_name:'',address:'',value:546,
-          collection_name:'',collection_slug:'',title:'',parent:'',children:[],
-          preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
-          genesis_tx:id.replace(/i\d+$/,''),_ord:true};
-      });
-      return{r:r,src:'ordinals.com',err:null};
-    }).catch(function(){
-      var mq=mimes?('&mime_type='+encodeURIComponent(mimes.split(',')[0])):'';
-      return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24'+bisSortParam()+mq+bisRangeParam())
-        .then(function(d){
-          var r=(d.data||[]).map(nBIS).filter(Boolean);
-          if(r.length)return{r:r,src:'BestInSlot',err:null};
+  if(!mimeList.length) return seedFallback(off);
+
+  // Fetch first MIME type (primary)
+  return fetchWithMime(mimeList[0])
+    .then(function(r){
+      if(r&&r.length)return{r:r,src:'BestInSlot ('+CT.label.replace(/[^a-zA-Z0-9 ]/g,'')+' only)',err:null};
+      // Try second MIME if first returned empty
+      if(mimeList.length>1){
+        return fetchWithMime(mimeList[1]).then(function(r2){
+          if(r2&&r2.length)return{r:r2,src:'BestInSlot',err:null};
           throw new Error('empty');
-        }).catch(function(){
-          return apiFetch(ORDSCAN+'/inscriptions?page='+(Math.floor(off/24)+1))
-            .then(function(d){
-              var r=(d.data||d.results||[]).map(nOrd).filter(Boolean);
-              if(r.length)return{r:r,src:'Ordiscan',err:null};
-              throw new Error('empty');
-            }).catch(function(){return seedFallback(off);});
         });
+      }
+      throw new Error('empty');
+    }).catch(function(){
+      // Final fallback — Ordiscan with MIME
+      return apiFetch(ORDSCAN+'/inscriptions?page='+(Math.floor(off/24)+1)+'&mime_type='+encodeURIComponent(mimeList[0]))
+        .then(function(d){
+          var r=(d.data||d.results||[]).map(nOrd).filter(Boolean);
+          if(r.length)return{r:r,src:'Ordiscan',err:null};
+          throw new Error('empty');
+        }).catch(function(){return seedFallback(off);});
     });
 }
 
@@ -981,16 +1027,22 @@ function loadCollections(onDone){
 function fetchBISCols(offset,onDone){
   if(ST.COL_LOADING)return;
   ST.COL_LOADING=true;
-  apiFetch(BIS+'/collection/collections?sort_by=median_number&order=asc&offset='+offset+'&count=100')
+  // BestInSlot collections endpoint — sorted by oldest inscription number first
+  var url=BIS+'/collection/collections?sort_by=median_number&order=asc&offset='+offset+'&count=100';
+  apiFetch(url)
     .then(function(d){
       var items=(d.data||[]).map(normBISCol).filter(Boolean);
       ST.COL_CACHE=ST.COL_CACHE.concat(items);
       ST.COL_OFFSET=offset+items.length;
       ST.COL_HAS_MORE=items.length>=100;
       ST.COL_LOADING=false;
+      ST.COL_SOURCE='BestInSlot (live &middot; '+ST.COL_CACHE.length.toLocaleString()+' loaded)';
       if(onDone)onDone(ST.COL_CACHE);
-    }).catch(function(){
+    }).catch(function(e){
       ST.COL_LOADING=false;
+      ST.COL_HAS_MORE=false;
+      // If CORS blocks — show helpful message and return empty so UI still renders
+      ST.COL_SOURCE='BestInSlot (CORS blocked &mdash; use collection-fetcher.html to download collections.json)';
       if(onDone)onDone(ST.COL_CACHE);
     });
 }
@@ -1279,7 +1331,7 @@ function openAddr(addr){
         +'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Back'
       +'</button>'
       +'<div class="surface" style="padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(135deg,rgba(247,147,26,0.05),rgba(255,107,255,0.05))">'
-        +'<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#000;flex-shrink:0;box-shadow:0 0 20px rgba(247,147,26,0.4)">'+addr.slice(2,4).toUpperCase()+'</div>'
+        +'<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#e07b0a);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#000;flex-shrink:0;box-shadow:0 0 20px rgba(247,147,26,0.4)">'+addr.slice(2,4).toUpperCase()+'</div>'
         +'<div style="flex:1;min-width:0">'
           +'<div class="section-label" style="margin-bottom:4px">&#128273; Bitcoin Address</div>'
           +'<div style="font-size:13px;font-weight:800;color:var(--text);word-break:break-all">'+addr+'</div>'
@@ -1323,17 +1375,21 @@ function renderCollections(){
   var colSearch='';
 
   function buildUI(list){
-    var filtered=colSearch?list.filter(function(c){var q=colSearch.toLowerCase();return(c.name||'').toLowerCase().includes(q)||(c.slug||'').toLowerCase().includes(q);}):list;
+    var filtered=list.filter(function(c){
+      if(!colSearch)return true;
+      var q=colSearch.toLowerCase();
+      return(c.name||'').toLowerCase().includes(q)||(c.slug||'').toLowerCase().includes(q);
+    });
     pg.innerHTML=
       '<div style="max-width:1060px;margin:0 auto;padding:24px 20px">'
         +'<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">'
           +'<div>'
-            +'<div style="font-family:var(--font-display);font-size:32px;color:var(--accent2);letter-spacing:1px;text-shadow:0 0 20px rgba(255,107,255,0.4)">&#127912; Collections</div>'
+            +'<div style="font-family:var(--font-display);font-size:32px;color:var(--accent);letter-spacing:1px;text-shadow:0 0 20px rgba(247,147,26,0.4)">&#127912; Collections</div>'
             +'<div style="font-size:11px;color:var(--text3);margin-top:4px;font-weight:700">'+(ST.COL_SOURCE?'via '+ST.COL_SOURCE:'Loading...')+'</div>'
           +'</div>'
           +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
             +'<div class="surface" style="padding:6px 14px;font-size:11px;color:var(--text2);font-weight:800">'
-              +'<span style="color:var(--accent2);font-weight:900">'+filtered.length.toLocaleString()+'</span>'
+              +'<span style="color:var(--accent);font-weight:900">'+filtered.length.toLocaleString()+'</span>'
               +' / '+list.length.toLocaleString()+' collections'
             +'</div>'
             +'<a href="collection-fetcher.html" target="_blank" class="btn-ghost" style="font-size:11px">&#128230; Fetcher</a>'
@@ -1347,7 +1403,7 @@ function renderCollections(){
           +(ST.COL_HAS_MORE?'<button onclick="loadMoreCols()" class="btn-ghost" style="font-size:12px;white-space:nowrap">More +100</button>':'')
         +'</div>'
         +(filtered.length===0
-          ?'<div class="no-results">No collections matching &ldquo;'+colSearch+'&rdquo;</div>'
+          ?(colSearch?'<div class="no-results">No collections matching &ldquo;'+colSearch+'&rdquo;</div>':'<div class="no-results">No collections loaded yet. Click Load More or use the Fetcher.</div>')
           :'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">'
             +filtered.map(function(c,i){return buildColCard(c,i);}).join('')
           +'</div>'
@@ -1412,7 +1468,7 @@ function openCollection(slug,name){
       +'<button class="back-btn" onclick="renderCollections()">'
         +'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Collections'
       +'</button>'
-      +'<div style="font-family:var(--font-display);font-size:28px;color:'+accent+';letter-spacing:1px;margin-bottom:5px;text-shadow:0 0 16px '+accent+'44">'+name+'</div>'
+      +'<div style="font-family:var(--font-display);font-size:28px;color:var(--accent);letter-spacing:1px;margin-bottom:5px;text-shadow:0 0 16px rgba(247,147,26,0.3)">'+name+'</div>'
       +'<div style="font-size:11px;color:var(--text3);margin-bottom:18px;font-weight:700">Fetching via BestInSlot &middot; slug: '+slug+'</div>'
       +'<div class="grid" id="col-grid">'+skCards(12)+'</div>'
     +'</div>';
