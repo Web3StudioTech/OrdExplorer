@@ -3,329 +3,178 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="description" content="Bitcoin Ordinals Explorer — Browse inscriptions, collections, blocks, runes and more.">
+<meta name="theme-color" content="#070b10">
 <title>ord.xyz &mdash; Bitcoin Ordinals Explorer</title>
-<meta name="description" content="Bitcoin Ordinals Explorer — Browse inscriptions, collections, blocks, runes and more. Powered by ordinals.com.">
 <style>
-/* ── RESET & BASE ─────────────────────────────────────────────────────────── */
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{background:#070b10;color:#d8e0ea;font-family:'Inter',system-ui,-apple-system,sans-serif;min-height:100vh;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
-button,input{font-family:inherit}
+button,input,select{font-family:inherit}
 iframe{border:none;display:block}
-img{display:block;max-width:100%}
 
-/* ── ANIMATIONS ───────────────────────────────────────────────────────────── */
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
 @keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-@keyframes glow{0%,100%{box-shadow:0 0 8px rgba(247,147,26,.3)}50%{box-shadow:0 0 20px rgba(247,147,26,.6)}}
 
-/* ── UTILITY ──────────────────────────────────────────────────────────────── */
 .sk{background:linear-gradient(90deg,#0d1520 25%,#1a2535 50%,#0d1520 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite;border-radius:6px}
 .fade{animation:fadeUp .28s ease both}
-.spin{animation:spin .8s linear infinite;display:inline-block}
-.pulse{animation:pulse 2s ease-in-out infinite}
+.spin-el{animation:spin .8s linear infinite;display:inline-block}
 
-/* ── SCROLLBAR ────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:#070b10}
 ::-webkit-scrollbar-thumb{background:#1a2535;border-radius:3px}
-::-webkit-scrollbar-thumb:hover{background:#243040}
 
-/* ── NAV ──────────────────────────────────────────────────────────────────── */
-#nav{
-  position:sticky;top:0;z-index:100;
-  height:54px;padding:0 20px;
-  background:rgba(7,11,16,.97);
-  border-bottom:1px solid #141f2e;
-  display:flex;align-items:center;gap:0;
-  backdrop-filter:blur(12px);
-}
-#logo{
-  display:flex;align-items:center;gap:9px;
-  cursor:pointer;margin-right:24px;flex-shrink:0;
-}
-#logo-icon{
-  width:32px;height:32px;border-radius:8px;
-  background:linear-gradient(135deg,#f7931a,#d4750e);
-  display:flex;align-items:center;justify-content:center;
-  font-size:16px;font-weight:900;color:#000;
-  box-shadow:0 2px 12px rgba(247,147,26,.35);
-}
+/* NAV */
+#nav{position:sticky;top:0;z-index:100;height:54px;padding:0 20px;background:rgba(7,11,16,.97);border-bottom:1px solid #141f2e;display:flex;align-items:center;gap:0;backdrop-filter:blur(12px)}
+#logo{display:flex;align-items:center;gap:9px;cursor:pointer;margin-right:22px;flex-shrink:0}
+#logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#f7931a,#d4750e);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#000;box-shadow:0 2px 12px rgba(247,147,26,.35)}
 #logo-text{font-size:16px;font-weight:800;color:#f7931a;letter-spacing:-.4px}
-#nav-links{display:flex;align-items:center;gap:2px;flex:1}
-.nl{
-  padding:5px 13px;border-radius:7px;font-size:12px;font-weight:600;
-  border:none;cursor:pointer;background:transparent;color:#5a7090;
-  transition:all .14s;
-}
+#nav-links{display:flex;align-items:center;gap:1px;flex:1;overflow-x:auto}
+#nav-links::-webkit-scrollbar{height:0}
+.nl{padding:5px 11px;border-radius:7px;font-size:12px;font-weight:600;border:none;cursor:pointer;background:transparent;color:#5a7090;transition:all .14s;white-space:nowrap;flex-shrink:0}
 .nl:hover,.nl.on{color:#f7931a;background:rgba(247,147,26,.1)}
-#nav-search{
-  display:flex;align-items:center;
-  background:#0d1520;border:1px solid #141f2e;
-  border-radius:8px;padding:0 11px;height:34px;
-  width:250px;gap:7px;flex-shrink:0;
-  transition:border-color .14s;
-}
+#nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+#nav-search{display:flex;align-items:center;background:#0d1520;border:1px solid #141f2e;border-radius:8px;padding:0 11px;height:34px;width:240px;gap:7px;transition:border-color .14s}
 #nav-search:focus-within{border-color:rgba(247,147,26,.4)}
-#nav-search svg{flex-shrink:0}
-#sq{
-  background:none;border:none;color:#d8e0ea;
-  font-size:12px;flex:1;outline:none;width:100%;
-}
+#sq{background:none;border:none;color:#d8e0ea;font-size:12px;flex:1;outline:none;width:100%}
 #sq::placeholder{color:#3a5068}
-#wb{
-  margin-left:12px;padding:7px 15px;border-radius:8px;
-  background:linear-gradient(135deg,#f7931a,#d4750e);
-  border:none;color:#000;font-size:12px;font-weight:800;
-  cursor:pointer;white-space:nowrap;flex-shrink:0;
-  transition:opacity .14s;box-shadow:0 2px 12px rgba(247,147,26,.3);
-}
+#wb{padding:7px 15px;border-radius:8px;background:linear-gradient(135deg,#f7931a,#d4750e);border:none;color:#000;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;transition:opacity .14s;box-shadow:0 2px 12px rgba(247,147,26,.3)}
 #wb:hover{opacity:.88}
 
-/* ── STATUS BAR ───────────────────────────────────────────────────────────── */
+/* STATUS */
 #sbar{display:none;padding:5px 20px;font-size:11px;font-weight:600;letter-spacing:.2px}
+.live-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;animation:pulse 2s ease-in-out infinite}
 
-/* ── PAGE ─────────────────────────────────────────────────────────────────── */
-#pg{min-height:calc(100vh - 54px)}
-
-/* ── FILTER TABS ──────────────────────────────────────────────────────────── */
-.tab{
-  padding:4px 13px;border-radius:20px;font-size:11px;font-weight:600;
-  cursor:pointer;border:1px solid #141f2e;
-  background:rgba(255,255,255,.02);color:#5a7090;
-  white-space:nowrap;transition:all .13s;font-family:inherit;
-}
+/* FILTER BAR */
+#filter-wrap{background:rgba(7,11,16,.97);border-bottom:1px solid #141f2e;position:sticky;top:54px;z-index:90;backdrop-filter:blur(12px)}
+.fbar-row{padding:7px 20px;display:flex;gap:5px;overflow-x:auto;align-items:center}
+.fbar-row::-webkit-scrollbar{height:0}
+.tab{padding:4px 12px;border-radius:18px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #141f2e;background:rgba(255,255,255,.02);color:#5a7090;white-space:nowrap;transition:all .13s;font-family:inherit}
 .tab.on{border-color:#f7931a;background:rgba(247,147,26,.13);color:#f7931a}
 .tab:hover:not(.on){border-color:rgba(247,147,26,.25);color:#b07830}
+.tab-special{border-color:rgba(167,139,250,.3);color:#a78bfa;background:rgba(167,139,250,.07)}
+.tab-special:hover{border-color:rgba(167,139,250,.5)}
+.tab-special.on{border-color:#a78bfa;background:rgba(167,139,250,.18);color:#a78bfa}
+.tab-bitmap{border-color:rgba(251,191,36,.3);color:#fbbf24;background:rgba(251,191,36,.07)}
+.tab-bitmap.on{border-color:#fbbf24;background:rgba(251,191,36,.18);color:#fbbf24}
+.tab-game{border-color:rgba(34,197,94,.3);color:#22c55e;background:rgba(34,197,94,.07)}
+.tab-game.on{border-color:#22c55e;background:rgba(34,197,94,.18);color:#22c55e}
+.fdivider{width:1px;height:18px;background:#141f2e;flex-shrink:0;margin:0 3px}
 
-/* ── CARDS ────────────────────────────────────────────────────────────────── */
-.card{
-  background:#0d1520;border:1px solid #141f2e;border-radius:12px;
-  overflow:hidden;cursor:pointer;
-  transition:transform .16s,border-color .18s,box-shadow .18s;
-}
-.card:hover{
-  transform:translateY(-3px);
-  border-color:rgba(247,147,26,.4);
-  box-shadow:0 10px 32px rgba(247,147,26,.08);
-}
+/* SORT / FILTER ROW */
+.sort-row{padding:5px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:1px solid #0e1a28}
+.sort-label{font-size:10px;font-weight:700;color:#304055;letter-spacing:.5px;flex-shrink:0}
+.sort-btn{padding:3px 9px;border-radius:5px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#304055;transition:all .13s;font-family:inherit}
+.sort-btn.on{background:#f7931a;color:#000}
+.sort-btn:hover:not(.on){color:#f7931a}
+.range-input{background:#0d1520;border:1px solid #141f2e;border-radius:6px;padding:3px 9px;color:#d8e0ea;font-size:10px;width:90px;outline:none;height:26px;transition:border-color .14s}
+.range-input:focus{border-color:rgba(247,147,26,.4)}
+.go-btn{padding:3px 9px;border-radius:5px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:rgba(247,147,26,.15);color:#f7931a;font-family:inherit;transition:all .13s}
+.go-btn:hover{background:rgba(247,147,26,.25)}
+
+/* SOURCE ROW */
+.src-row{padding:4px 20px;font-size:11px;color:#304055;border-bottom:1px solid #0e1a28;display:flex;align-items:center;gap:6px}
+
+/* GRID */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:13px;padding:16px 20px}
+
+/* CARD */
+.card{background:#0d1520;border:1px solid #141f2e;border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .16s,border-color .18s,box-shadow .18s}
+.card:hover{transform:translateY(-3px);border-color:rgba(247,147,26,.4);box-shadow:0 10px 32px rgba(247,147,26,.08)}
 .card-media{position:relative;aspect-ratio:1;background:#050810;overflow:hidden}
 .card-media iframe{width:100%;height:100%;pointer-events:none}
 .card-body{padding:9px 11px 11px}
-.card-num{font-size:12px;font-weight:700;color:#d8e0ea;margin-bottom:3px;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-num{font-size:12px;font-weight:700;color:#d8e0ea;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card-meta{display:flex;justify-content:space-between;font-size:10px;color:#304055}
+.badge{position:absolute;top:7px;left:7px;color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:3px;letter-spacing:.5px;pointer-events:none}
+.rbadge{position:absolute;top:7px;right:7px;font-size:9px;font-weight:800;padding:2px 6px;border-radius:3px;pointer-events:none}
+.colbadge{position:absolute;bottom:0;left:0;right:0;padding:5px 8px;background:linear-gradient(transparent,rgba(5,8,16,.95));font-size:10px;font-weight:700;color:#f7931a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none}
+.bitmap-badge{position:absolute;bottom:7px;right:7px;background:rgba(251,191,36,.2);color:#fbbf24;font-size:9px;font-weight:800;padding:2px 6px;border-radius:3px;pointer-events:none}
 
-/* ── GRID ─────────────────────────────────────────────────────────────────── */
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(178px,1fr));
-  gap:13px;padding:16px 20px;
-}
-
-/* ── BADGES ───────────────────────────────────────────────────────────────── */
-.badge{
-  position:absolute;top:7px;left:7px;
-  color:#fff;font-size:9px;font-weight:800;
-  padding:2px 6px;border-radius:3px;letter-spacing:.5px;
-  pointer-events:none;
-}
-.rbadge{
-  position:absolute;top:7px;right:7px;
-  font-size:9px;font-weight:800;
-  padding:2px 6px;border-radius:3px;
-  pointer-events:none;
-}
-.colbadge{
-  position:absolute;bottom:0;left:0;right:0;
-  padding:5px 8px;
-  background:linear-gradient(transparent,rgba(5,8,16,.95));
-  font-size:10px;font-weight:700;color:#f7931a;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  pointer-events:none;
-}
-
-/* ── BUTTONS ──────────────────────────────────────────────────────────────── */
-.btn-primary{
-  padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;
-  background:linear-gradient(135deg,#f7931a,#d4750e);
-  border:none;color:#000;cursor:pointer;
-  transition:opacity .14s;font-family:inherit;
-}
-.btn-primary:hover{opacity:.88}
-.btn-ghost{
-  padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;
-  background:rgba(255,255,255,.03);border:1px solid #1a2535;color:#5a7090;
-  cursor:pointer;transition:all .14s;font-family:inherit;text-decoration:none;
-  display:inline-flex;align-items:center;gap:5px;
-}
-.btn-ghost:hover{border-color:rgba(247,147,26,.35);color:#f7931a}
-.btn-orange{
-  padding:6px 13px;border-radius:7px;font-size:11px;font-weight:700;
-  background:rgba(247,147,26,.1);border:1px solid rgba(247,147,26,.3);
-  color:#f7931a;cursor:pointer;transition:all .14s;font-family:inherit;
-  text-decoration:none;display:inline-block;
-}
-.btn-orange:hover{background:rgba(247,147,26,.18)}
-.load-more{
-  padding:10px 28px;background:transparent;
-  border:1px solid #1a2535;border-radius:8px;
-  color:#5a7090;font-size:13px;font-weight:600;
-  cursor:pointer;transition:all .15s;font-family:inherit;
-}
-.load-more:hover{border-color:rgba(247,147,26,.4);color:#f7931a}
-
-/* ── SURFACE CARDS ────────────────────────────────────────────────────────── */
-.surface{
-  background:#0d1520;border:1px solid #141f2e;border-radius:12px;
-}
-.section-label{
-  font-size:9px;font-weight:700;color:#304055;
-  letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;
-}
-
-/* ── META TABLE ───────────────────────────────────────────────────────────── */
-.meta-row{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:8px 16px;font-size:12px;
-  border-bottom:1px solid #0e1a28;
-}
+/* SURFACES */
+.surface{background:#0d1520;border:1px solid #141f2e;border-radius:12px}
+.section-label{font-size:9px;font-weight:700;color:#304055;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.meta-row{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;font-size:12px;border-bottom:1px solid #0e1a28}
 .meta-row:last-child{border-bottom:none}
 .meta-label{color:#5a7090;font-weight:500;flex-shrink:0;margin-right:12px}
 .meta-val{color:#d8e0ea;font-weight:600;text-align:right;word-break:break-all;max-width:65%}
-
-/* ── STAT CARD ────────────────────────────────────────────────────────────── */
-.stat-card{
-  background:#0d1520;border:1px solid #141f2e;border-radius:10px;
-  padding:14px 16px;text-align:center;
-}
+.stat-card{background:#0d1520;border:1px solid #141f2e;border-radius:10px;padding:14px 16px;text-align:center}
 .stat-val{font-size:20px;font-weight:800;color:#f7931a;margin-bottom:3px}
 .stat-label{font-size:9px;font-weight:700;color:#304055;letter-spacing:.6px}
 
-/* ── MARKET LINKS ─────────────────────────────────────────────────────────── */
-.mlink{
-  padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;
-  background:rgba(255,255,255,.02);border:1px solid #141f2e;color:#5a7090;
-  text-decoration:none;transition:all .13s;display:inline-block;
-}
+/* BUTTONS */
+.btn-primary{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;background:linear-gradient(135deg,#f7931a,#d4750e);border:none;color:#000;cursor:pointer;transition:opacity .14s;font-family:inherit}
+.btn-primary:hover{opacity:.88}
+.btn-ghost{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.03);border:1px solid #1a2535;color:#5a7090;cursor:pointer;transition:all .14s;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.btn-ghost:hover{border-color:rgba(247,147,26,.35);color:#f7931a}
+.btn-orange{padding:6px 13px;border-radius:7px;font-size:11px;font-weight:700;background:rgba(247,147,26,.1);border:1px solid rgba(247,147,26,.3);color:#f7931a;cursor:pointer;transition:all .14s;font-family:inherit;text-decoration:none;display:inline-block}
+.btn-orange:hover{background:rgba(247,147,26,.18)}
+.load-more{padding:10px 28px;background:transparent;border:1px solid #1a2535;border-radius:8px;color:#5a7090;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+.load-more:hover{border-color:rgba(247,147,26,.4);color:#f7931a}
+.mlink{padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;background:rgba(255,255,255,.02);border:1px solid #141f2e;color:#5a7090;text-decoration:none;transition:all .13s;display:inline-block}
 .mlink:hover{color:#f7931a;border-color:rgba(247,147,26,.3)}
+.wbtn{display:flex;align-items:center;gap:12px;width:100%;padding:13px 15px;margin-bottom:8px;background:rgba(255,255,255,.02);border:1px solid #141f2e;border-radius:10px;cursor:pointer;color:#d8e0ea;font-size:14px;font-weight:600;transition:all .14s;text-align:left;font-family:inherit}
+.wbtn:hover{border-color:rgba(247,147,26,.35);background:rgba(247,147,26,.04)}
 
-/* ── MODAL ────────────────────────────────────────────────────────────────── */
-#modal{
-  position:fixed;inset:0;background:rgba(0,0,0,.82);
-  display:flex;align-items:center;justify-content:center;
-  z-index:200;backdrop-filter:blur(6px);
-  animation:fadeIn .18s ease;
-}
-.modal-box{
-  background:#0d1520;border:1px solid #1a2535;border-radius:16px;
-  padding:24px;max-width:92vw;
-  animation:slideDown .2s ease;
-  max-height:90vh;overflow-y:auto;
-}
-
-/* ── TOAST ────────────────────────────────────────────────────────────────── */
-#tst{position:fixed;bottom:22px;right:22px;z-index:500;pointer-events:none}
-.toast-msg{
-  background:#0d1520;border:1px solid #f7931a;border-radius:9px;
-  padding:11px 16px;color:#f7931a;font-size:12px;font-weight:600;
-  pointer-events:auto;animation:fadeUp .2s ease;max-width:320px;
-  box-shadow:0 4px 24px rgba(247,147,26,.15);
-}
-
-/* ── DETAIL PAGE ──────────────────────────────────────────────────────────── */
-.detail-wrap{max-width:1040px;margin:0 auto;padding:24px 20px}
+/* DETAIL */
+.detail-wrap{max-width:1060px;margin:0 auto;padding:24px 20px}
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
-
-/* ── BACK BTN ─────────────────────────────────────────────────────────────── */
-.back-btn{
-  display:inline-flex;align-items:center;gap:6px;
-  background:none;border:none;color:#5a7090;
-  font-size:12px;font-weight:600;cursor:pointer;
-  margin-bottom:22px;padding:0;font-family:inherit;
-  transition:color .13s;
-}
+.back-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:#5a7090;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:22px;padding:0;font-family:inherit;transition:color .13s}
 .back-btn:hover{color:#f7931a}
-
-/* ── HERO STRIP ───────────────────────────────────────────────────────────── */
-.hero-strip{
-  padding:18px 20px 14px;border-bottom:1px solid #141f2e;
-  display:flex;align-items:flex-start;
-  justify-content:space-between;flex-wrap:wrap;gap:10px;
-}
-.hero-title{font-size:19px;font-weight:800;color:#f7931a;letter-spacing:-.3px}
-.hero-sub{font-size:11px;color:#304055;margin-top:3px;line-height:1.5}
-
-/* ── FILTER BAR STICKY ────────────────────────────────────────────────────── */
-.filter-bar{
-  padding:8px 20px;border-bottom:1px solid #141f2e;
-  display:flex;gap:5px;overflow-x:auto;
-  position:sticky;top:54px;z-index:50;
-  background:rgba(7,11,16,.97);
-}
-.filter-bar::-webkit-scrollbar{height:0}
-
-/* ── SOURCE ROW ───────────────────────────────────────────────────────────── */
-.src-row{
-  padding:5px 20px;font-size:11px;color:#304055;
-  border-bottom:1px solid #141f2e;
-  display:flex;align-items:center;gap:6px;
-}
-.live-dot{
-  width:7px;height:7px;border-radius:50%;
-  display:inline-block;margin-right:3px;
-  animation:pulse 2s ease-in-out infinite;
-}
-
-/* ── PIPE DIAGRAM ─────────────────────────────────────────────────────────── */
-.pipe-step{
-  display:flex;gap:13px;padding:10px 0;
-  border-bottom:1px solid #0e1a28;
-}
+.pipe-step{display:flex;gap:13px;padding:10px 0;border-bottom:1px solid #0e1a28}
 .pipe-step:last-child{border-bottom:none}
-.pipe-num{
-  width:28px;height:28px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:11px;font-weight:800;flex-shrink:0;
-}
+.pipe-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
 
-/* ── RUNES ────────────────────────────────────────────────────────────────── */
-.rune-card{
-  background:#0d1520;border:1px solid #141f2e;border-radius:10px;
-  padding:14px 16px;transition:border-color .14s,transform .14s;cursor:pointer;
-}
-.rune-card:hover{border-color:rgba(247,147,26,.35);transform:translateY(-2px)}
+/* MODAL */
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(6px);animation:fadeIn .18s ease}
+.modal-box{background:#0d1520;border:1px solid #1a2535;border-radius:16px;padding:24px;max-width:92vw;animation:slideDown .2s ease;max-height:90vh;overflow-y:auto}
 
-/* ── COLLECTION CARD ──────────────────────────────────────────────────────── */
-.col-card{
-  background:#0d1520;border:1px solid #141f2e;border-radius:12px;
-  overflow:hidden;cursor:pointer;
-  transition:transform .16s,border-color .18s;
-}
-.col-card:hover{transform:translateY(-3px);border-color:rgba(247,147,26,.38)}
+/* TOAST */
+#tst{position:fixed;bottom:22px;right:22px;z-index:500;pointer-events:none}
+.toast-msg{background:#0d1520;border:1px solid #f7931a;border-radius:9px;padding:11px 16px;color:#f7931a;font-size:12px;font-weight:600;pointer-events:auto;animation:fadeUp .2s ease;max-width:320px;box-shadow:0 4px 24px rgba(247,147,26,.15)}
 
-/* ── RESPONSIVE ───────────────────────────────────────────────────────────── */
-@media(max-width:750px){
-  .detail-grid{grid-template-columns:1fr}
-  #nav-links .nl:not(#n-home){display:none}
-  #nav-search{width:160px}
-  .grid{grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px;padding:12px}
-  .stats-4{grid-template-columns:repeat(2,1fr)!important}
-}
-@media(max-width:480px){
-  #nav-search{display:none}
-  #logo-text{display:none}
-}
+/* CONTENT TYPE ICONS */
+.ct-video{background:#ef4444}
+.ct-image{background:#3b82f6}
+.ct-gif{background:#f59e0b}
+.ct-text{background:#64748b}
+.ct-audio{background:#8b5cf6}
+.ct-svg{background:#ec4899}
+.ct-html{background:#10b981}
+.ct-js{background:#f59e0b}
+.ct-3d{background:#06b6d4}
+.ct-md{background:#84cc16}
+.ct-bitmap{background:#fbbf24}
+.ct-game{background:#22c55e}
+.ct-parent{background:#a78bfa}
+.ct-file{background:#475569}
+
+/* BITMAP SPECIAL */
+.bitmap-preview{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;background:linear-gradient(135deg,#0a0f18,#111824)}
+.bitmap-num{font-size:22px;font-weight:900;color:#fbbf24;letter-spacing:-.5px}
+.bitmap-label{font-size:10px;font-weight:700;color:#92681a;letter-spacing:1px}
+
+/* GAME SPECIAL */
+.game-preview{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;background:linear-gradient(135deg,#051208,#0a1f12)}
+.game-icon{font-size:36px}
+.game-label{font-size:9px;font-weight:700;color:#16a34a;letter-spacing:1px}
+
+/* NO RESULTS */
+.no-results{grid-column:1/-1;text-align:center;color:#304055;padding:60px 20px;font-size:14px}
+.no-results a{color:#f7931a}
+
+/* RESPONSIVE */
+@media(max-width:750px){.detail-grid{grid-template-columns:1fr}.stats-4{grid-template-columns:repeat(2,1fr)!important}#nav-links .nl:nth-child(n+5){display:none}#nav-search{width:160px}}
+@media(max-width:500px){#logo-text{display:none}#nav-search{display:none}}
 </style>
 </head>
 <body>
 
-<!-- ── NAV ────────────────────────────────────────────────────────────────── -->
 <nav id="nav">
   <div id="logo" onclick="go('home')">
     <div id="logo-icon">&#8383;</div>
@@ -336,46 +185,71 @@ img{display:block;max-width:100%}
     <button class="nl"    id="n-collections" onclick="go('collections')">Collections</button>
     <button class="nl"    id="n-runes"       onclick="go('runes')">Runes</button>
     <button class="nl"    id="n-blocks"      onclick="go('blocks')">Blocks</button>
+    <button class="nl"    id="n-sats"        onclick="go('sats')">Sats</button>
     <button class="nl"    id="n-stats"       onclick="go('stats')">Stats</button>
   </div>
-  <div id="nav-search">
-    <svg width="13" height="13" fill="none" stroke="#3a5068" stroke-width="2.2" viewBox="0 0 24 24">
-      <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-    </svg>
-    <input id="sq" onkeydown="doSearch(event)"
-      placeholder="Inscription # &middot; ID &middot; address &middot; sat...">
+  <div id="nav-right">
+    <div id="nav-search">
+      <svg width="13" height="13" fill="none" stroke="#3a5068" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input id="sq" onkeydown="doSearch(event)" placeholder="# &middot; ID &middot; address &middot; sat &middot; block...">
+    </div>
+    <button id="wb" onclick="openWallet()">Connect Wallet</button>
   </div>
-  <button id="wb" onclick="openWallet()">Connect Wallet</button>
 </nav>
 
-<!-- ── STATUS BAR ─────────────────────────────────────────────────────────── -->
 <div id="sbar"></div>
-
-<!-- ── PAGE ───────────────────────────────────────────────────────────────── -->
 <div id="pg"></div>
-
-<!-- ── MODAL ──────────────────────────────────────────────────────────────── -->
 <div id="modal" style="display:none" onclick="if(event.target===this)closeModal()"></div>
-
-<!-- ── TOAST ──────────────────────────────────────────────────────────────── -->
 <div id="tst"></div>
 
 <script>
 'use strict';
 
 // ── CONFIG ──────────────────────────────────────────────────────────────────
-//
-// PROXY: deploy proxy-worker.js to Cloudflare Workers and set your URL here.
-// While testing locally, the proxy URL below is a public demo instance.
-// Replace with your own: https://your-worker.your-subdomain.workers.dev
-//
-const PROXY = 'https://ord-proxy.ordxyz.workers.dev';   // ← replace after deploy
-const ORD   = 'https://ordinals.com';                    // always used for content/preview
+var PROXY   = 'https://ord-proxy.ordxyz.workers.dev';
+var ORD     = 'https://ordinals.com';
+var BIS     = 'https://api.bestinslot.xyz/v3';
+var ORDSCAN = 'https://api.ordiscan.com/v1';
 
-// ── KNOWN SEED DATA ──────────────────────────────────────────────────────────
-// Real inscription IDs from ordinals.com block 949,146 (May 13 2026)
-// Used as instant-load fallback when APIs are unavailable
-const SEEDS = [
+// ── CONTENT TYPE DEFINITIONS ─────────────────────────────────────────────────
+// Matches ord.io's content-type URL params exactly
+var CONTENT_TYPES = [
+  {id:'all',        label:'All',        mime:null,                   cls:'',          icon:'?',   urlParam:'all'},
+  {id:'image',      label:'Images',     mime:'image/png,image/jpeg,image/webp,image/avif', cls:'ct-image',  icon:'IMG', urlParam:'image'},
+  {id:'gif',        label:'GIFs',       mime:'image/gif',            cls:'ct-gif',    icon:'GIF', urlParam:'gif'},
+  {id:'text',       label:'Text',       mime:'text/plain',           cls:'ct-text',   icon:'TXT', urlParam:'text'},
+  {id:'video',      label:'Videos',     mime:'video/mp4,video/webm', cls:'ct-video',  icon:'VID', urlParam:'video'},
+  {id:'parent',     label:'Parents',    mime:null,                   cls:'ct-parent', icon:'PAR', urlParam:'parent'},
+  {id:'game',       label:'Games',      mime:'text/html',            cls:'ct-game',   icon:'GAME',urlParam:'game'},
+  {id:'audio',      label:'Audio',      mime:'audio/mpeg,audio/wav,audio/ogg,audio/flac', cls:'ct-audio', icon:'AUD', urlParam:'audio'},
+  {id:'3d',         label:'3D',         mime:'model/gltf-binary,model/gltf+json',     cls:'ct-3d',     icon:'3D',  urlParam:'3d'},
+  {id:'svg',        label:'SVGs',       mime:'image/svg+xml',        cls:'ct-svg',    icon:'SVG', urlParam:'svg'},
+  {id:'html',       label:'HTML',       mime:'text/html',            cls:'ct-html',   icon:'HTML',urlParam:'html'},
+  {id:'javascript', label:'JavaScript', mime:'application/javascript,text/javascript',cls:'ct-js','icon':'JS', urlParam:'javascript'},
+  {id:'markdown',   label:'Markdown',   mime:'text/markdown',        cls:'ct-md',     icon:'MD',  urlParam:'markdown'},
+  {id:'bitmap',     label:'Bitmap',     mime:null,                   cls:'ct-bitmap', icon:'BMP', urlParam:'bitmap'},
+];
+
+// Trending / sort options matching ord.io exactly
+var TRENDING = [
+  {id:'1h',   label:'1H'},
+  {id:'1d',   label:'1D'},
+  {id:'1w',   label:'1W'},
+  {id:'1m',   label:'1M'},
+  {id:'all',  label:'All'},
+];
+
+// Sort / order options
+var SORT_OPTS = [
+  {id:'newest',  label:'Newest'},
+  {id:'oldest',  label:'Oldest'},
+  {id:'highest', label:'Highest #'},
+  {id:'lowest',  label:'Lowest #'},
+  {id:'rare',    label:'Rare Sats'},
+];
+
+// ── SEED IDs (real from ordinals.com block 949,146) ──────────────────────────
+var SEEDS = [
   '8c798a6dd99a6dae3c5d013aba245c9a5cb637b118344f0d7583d74c9aa8d61ai0',
   '9efeea87f1cac2496738b8702567563b34911d1659d6c6ba70b3de95ec2f6d0di0',
   'fc773d29adf37f3f4f05ae37e2e1ea3d52f2dd6eba4d9748b74d1755b63c1652i0',
@@ -402,27 +276,181 @@ const SEEDS = [
   '20fa9d317af18cc976a6b77797ceb5884127ac5dd7e3f131565a18dd712311c6i0',
 ];
 
-// Notable collections (BestInSlot slugs)
-const COLLECTIONS = [
-  {slug:'bitcoin-punks',    name:'Bitcoin Punks',      supply:10000, desc:'The original 10k collection on Bitcoin. First-ever on-chain PFP project.',      accent:'#f59e0b'},
-  {slug:'ordinal-maxi-biz', name:'Ordinal Maxi Biz',   supply:21000, desc:'OMB — The OG Ordinals community collection. 21k supply mirroring BTC.',         accent:'#3b82f6'},
-  {slug:'nodemonkes',       name:'NodeMonkes',          supply:10000, desc:'First 10k generative collection inscribed post ordinals-launch.',                accent:'#10b981'},
-  {slug:'bitcoin-frogs',    name:'Bitcoin Frogs',       supply:10000, desc:'Fully on-chain generative frogs. Community favourite.',                          accent:'#22c55e'},
-  {slug:'quantum-cats',     name:'Quantum Cats',        supply:3333,  desc:'By Taproot Wizards. Recursive inscriptions featuring Schr\u00f6dinger cats.',   accent:'#a78bfa'},
-  {slug:'runestone',        name:'Runestone',            supply:112383,desc:'Largest airdrop in Ordinals history. The rune stone that launched Runes.',       accent:'#f7931a'},
-  {slug:'ordinal-punks',    name:'Ordinal Punks',       supply:100,   desc:'Hand-crafted. Inscribed in the first 650. Ultra-rare and historic.',             accent:'#ec4899'},
-  {slug:'bitcoin-shrooms',  name:'Bitcoin Shrooms',     supply:10000, desc:'Psychedelic mushrooms. Fully on-chain generative.',                              accent:'#84cc16'},
-  {slug:'taproot-wizards',  name:'Taproot Wizards',     supply:2106,  desc:'Monochrome wizards by Udi Wertheimer and Eric Wall. Historic OG collection.',    accent:'#8b5cf6'},
-  {slug:'pizza-ninjas',     name:'Pizza Ninjas',        supply:10000, desc:'Inscribed on pizza sats — the most rare satoshi type.',                          accent:'#f97316'},
-  {slug:'bitcoin-rocks',    name:'Bitcoin Rocks',       supply:100,   desc:'Inspired by Ethereum Rocks. One of the first collections on Ordinals.',          accent:'#78716c'},
-  {slug:'blob',             name:'Blob',                supply:10000, desc:'Viral blobs. One of the most traded Ordinals collections.',                      accent:'#06b6d4'},
+// Notable bitmap examples (format: number.bitmap)
+var BITMAPS = [
+  {num:'0',label:'Genesis Bitmap'},
+  {num:'1',label:'Block 1 Bitmap'},
+  {num:'9',label:'Block 9 Bitmap'},
+  {num:'21',label:'Block 21 Bitmap'},
+  {num:'210',label:'Block 210 Bitmap'},
+  {num:'420',label:'Block 420 Bitmap'},
+  {num:'777',label:'Lucky 777'},
+  {num:'888',label:'Lucky 888'},
+  {num:'1000',label:'Block 1,000'},
+  {num:'6930',label:'First Halving'},
+  {num:'9999',label:'Block 9,999'},
+  {num:'21000',label:'Block 21,000'},
+];
+
+// Collections — sourced from github.com/ordinals-wallet/ordinals-collections
+// 34 major collections across 6 categories
+var COLLECTIONS = [
+
+  // ── OG HISTORIC (first 1000 inscriptions era) ─────────────────────────────
+  {slug:'ordinal-punks',name:'Ordinal Punks',supply:100,
+   desc:'100 hand-made punks in the first 650 inscriptions ever. Rarest PFP on Bitcoin.',
+   accent:'#f59e0b',cat:'OG',twitter:'ordinalpunks',ins_from:407},
+
+  {slug:'bitcoin-shrooms',name:'Bitcoin Shrooms',supply:224,
+   desc:'Among the earliest inscriptions ever. Sold at Sotheby's. Ultra-rare artifacts.',
+   accent:'#84cc16',cat:'OG',twitter:'btcshrooms',ins_from:130},
+
+  {slug:'taproot-wizards',name:'Taproot Wizards',supply:2106,
+   desc:'By Udi Wertheimer & Eric Wall. Largest single inscription ever (4MB block).',
+   accent:'#8b5cf6',cat:'OG',twitter:'TaprootWizards',ins_from:652},
+
+  {slug:'bitcoin-rocks',name:'Bitcoin Rocks',supply:100,
+   desc:'Inspired by EtherRocks. One of the very first collections on Bitcoin Ordinals.',
+   accent:'#78716c',cat:'OG',twitter:'BitcoinRocks_',ins_from:2099},
+
+  {slug:'timechain-collectibles',name:'Timechain Collectibles',supply:21,
+   desc:'Only 21 ever — mirroring Bitcoin's max supply. Among the rarest Ordinals.',
+   accent:'#f7931a',cat:'OG',twitter:'TimechainCollect',ins_from:421},
+
+  {slug:'sub10k',name:'Sub10K',supply:9999,
+   desc:'All inscriptions under #10,000. One of the most historic sets on Bitcoin.',
+   accent:'#f7931a',cat:'OG',twitter:'sub10k_btc',ins_from:1},
+
+  // ── BLUE CHIP 10K ──────────────────────────────────────────────────────────
+  {slug:'bitcoin-punks',name:'Bitcoin Punks',supply:10000,
+   desc:'First 10k PFP on Bitcoin. Inspired by CryptoPunks. Inscriptions #89–#34,399.',
+   accent:'#f59e0b',cat:'Blue Chip',twitter:'Bitcoin_Punks_',ins_from:89},
+
+  {slug:'nodemonkes',name:'NodeMonkes',supply:10000,
+   desc:'First original 10k PFP on Bitcoin. BAYC co-founder Gordon Goner is a holder.',
+   accent:'#10b981',cat:'Blue Chip',twitter:'nodemonkes',ins_from:83522},
+
+  {slug:'bitcoin-frogs',name:'Bitcoin Frogs',supply:10000,
+   desc:'First 10k to sell out via free mint on Lightning. Strong cross-chain community.',
+   accent:'#22c55e',cat:'Blue Chip',twitter:'BitcoinFrogs_',ins_from:381224},
+
+  {slug:'ordinal-maxi-biz',name:'Ordinal Maxi Biz',supply:21000,
+   desc:'OMB — 21,000 supply mirroring BTC. Pioneer of the OG Ordinals community.',
+   accent:'#3b82f6',cat:'Blue Chip',twitter:'ordinalmaxibiz',ins_from:32},
+
+  {slug:'quantum-cats',name:'Quantum Cats',supply:3333,
+   desc:'By Taproot Wizards. Schrödinger-themed recursive inscriptions. Cultural milestone.',
+   accent:'#a78bfa',cat:'Blue Chip',twitter:'QuantumCatsXYZ',ins_from:1048568},
+
+  {slug:'bitcoin-puppets',name:'Bitcoin Puppets',supply:10000,
+   desc:'Top volume Ordinals collection. Creepy puppet PFPs. Most traded in 2024.',
+   accent:'#ef4444',cat:'Blue Chip',twitter:'BTCPuppets',ins_from:1078973},
+
+  {slug:'pizza-ninjas',name:'Pizza Ninjas',supply:10000,
+   desc:'Inscribed exclusively on pizza sats — the rarest satoshi type.',
+   accent:'#f97316',cat:'Blue Chip',twitter:'PizzaNinjas_',ins_from:281650},
+
+  {slug:'ocm-genesis',name:'OCM Genesis',supply:10000,
+   desc:'OnChainMonkey migrated from Ethereum. First collection in a single transaction.',
+   accent:'#06b6d4',cat:'Blue Chip',twitter:'OnChainMonkey',ins_from:1136232},
+
+  {slug:'bitcoin-badgers',name:'Bitcoin Badgers',supply:10000,
+   desc:'Badger PFPs on Bitcoin. Strong community with consistent trading volume.',
+   accent:'#64748b',cat:'Blue Chip',twitter:'BitcoinBadgers_',ins_from:450000},
+
+  {slug:'onchainducks',name:'OnChain Ducks',supply:10000,
+   desc:'10k pixel ducks inscribed fully on-chain. Strong and active community.',
+   accent:'#facc15',cat:'Blue Chip',twitter:'OnChainDucks',ins_from:165000},
+
+  {slug:'chainers',name:'Chainers',supply:10000,
+   desc:'Fully on-chain generative PFPs with a rare trait system.',
+   accent:'#a78bfa',cat:'Blue Chip',twitter:'ChainersNFT',ins_from:900000},
+
+  // ── AIRDROPS & MAJOR EVENTS ────────────────────────────────────────────────
+  {slug:'runestone',name:'Runestone',supply:112383,
+   desc:'Largest airdrop in Ordinals history. The artefact that launched the Runes protocol.',
+   accent:'#f7931a',cat:'Airdrop',twitter:'_Runestone',ins_from:72929185},
+
+  {slug:'rsic-metaprotocol',name:'RSIC Metaprotocol',supply:21000,
+   desc:'Airdropped to 9,000+ wallets. Mines RSIC runes per Bitcoin block.',
+   accent:'#10b981',cat:'Airdrop',twitter:'RSICprotocol',ins_from:64000000},
+
+  {slug:'natcats',name:'Natcats',supply:10000,
+   desc:'Naturally inscribed cats found on Bitcoin. All traits are naturally occurring on-chain.',
+   accent:'#f472b6',cat:'Airdrop',twitter:'NatcatsBitcoin',ins_from:0},
+
+  {slug:'ordinal-maxi-biz-green',name:'OMB Green Eyes',supply:11111,
+   desc:'OMB derivative — burned punks to create this unique collection. OG community.',
+   accent:'#22c55e',cat:'Airdrop',twitter:'ordinalmaxibiz',ins_from:700000},
+
+  // ── RECURSIVE & TECHNICAL ──────────────────────────────────────────────────
+  {slug:'recursive-punks',name:'Recursive Punks',supply:10000,
+   desc:'First 10,000 recursive collection. Regenerated using pre-inscribed traits as SVG.',
+   accent:'#a78bfa',cat:'Recursive',twitter:'RecursivePunks',ins_from:777000},
+
+  {slug:'bitcoin-apes',name:'Bitcoin Apes',supply:10000,
+   desc:'Ape PFPs fully inscribed on Bitcoin. OG wave of 10k recursive collections.',
+   accent:'#78350f',cat:'Recursive',twitter:'BitcoinApes_',ins_from:500000},
+
+  {slug:'hashlings',name:'Hashlings',supply:10000,
+   desc:'Utility Ordinals. Holders get discounted Bitcoin mining rig access.',
+   accent:'#f7931a',cat:'Recursive',twitter:'HashlingsNFT',ins_from:1200000},
+
+  // ── ART & 1-OF-1s ─────────────────────────────────────────────────────────
+  {slug:'bitcoin-face',name:'Bitcoin Faces',supply:1000,
+   desc:'Generative face art. Early and highly regarded Ordinals art collection.',
+   accent:'#f59e0b',cat:'Art',twitter:'BitcoinFaces_',ins_from:43000},
+
+  {slug:'ordinal-birds',name:'Ordinal Birds',supply:2121,
+   desc:'Hand-drawn birds inscribed on Bitcoin. Beloved early art collection.',
+   accent:'#22c55e',cat:'Art',twitter:'OrdinalBirds',ins_from:390000},
+
+  {slug:'bitcoin-wizards',name:'Bitcoin Wizards',supply:1024,
+   desc:'1024 wizard PFPs from the early Bitcoin Ordinals art scene.',
+   accent:'#8b5cf6',cat:'Art',twitter:'BTCWizards_',ins_from:100000},
+
+  {slug:'planet-ordinals',name:'Planet Ordinals',supply:888,
+   desc:'Unique planet illustrations. Early Ordinals art project with 888 supply.',
+   accent:'#3b82f6',cat:'Art',twitter:'PlanetOrdinals',ins_from:52000},
+
+  {slug:'inscribed-pepes',name:'Inscribed Pepes',supply:4444,
+   desc:'Pepe the Frog meme culture immortalized on Bitcoin. Meme meets blockchain.',
+   accent:'#84cc16',cat:'Art',twitter:'InscribedPepes',ins_from:200000},
+
+  {slug:'bitcoin-toads',name:'Bitcoin Toads',supply:6969,
+   desc:'Toad PFPs on Bitcoin. Community project steeped in Ordinals culture.',
+   accent:'#10b981',cat:'Art',twitter:'BitcoinToads_',ins_from:600000},
+
+  // ── MIGRATED FROM OTHER CHAINS ─────────────────────────────────────────────
+  {slug:'degods-btc',name:'DeGods (BTC)',supply:535,
+   desc:'Migrated from Solana. Compressed 210x210px and inscribed in block 776,408.',
+   accent:'#f8fafc',cat:'Migrated',twitter:'DeGodsNFT',ins_from:776000},
+
+  {slug:'bitcoin-frogs-2',name:'Bitcoin Frogs Gen2',supply:2000,
+   desc:'Second generation Bitcoin Frogs. Community expansion collection.',
+   accent:'#22c55e',cat:'Migrated',twitter:'BitcoinFrogs_',ins_from:5000000},
+
+  // ── UTILITY & NAMES ────────────────────────────────────────────────────────
+  {slug:'sats-names',name:'Sats Names (.sats)',supply:0,
+   desc:'Bitcoin naming system — register .sats domains as Ordinals. Decentralized identity.',
+   accent:'#f59e0b',cat:'Utility',twitter:'SatsNames',ins_from:400000},
+
+  {slug:'bitmap',name:'Bitmap',supply:0,
+   desc:'Claim Bitcoin blocks as digital real estate. number.bitmap inscription standard.',
+   accent:'#fbbf24',cat:'Utility',twitter:'bitmapBTC',ins_from:0},
 ];
 
 // ── STATE ────────────────────────────────────────────────────────────────────
 var ST = {
-  page:'home', filter:'All', items:[], off:0, hasMore:true,
-  loading:false, src:null, wallet:null, sel:null, aux:[],
-  blockHeight: 949146, proxyOk: null,
+  page:'home',
+  contentType:'all',    // current content type tab
+  trending:'1d',        // trending window
+  sort:'newest',        // sort order
+  rangeFrom:'',         // inscription range filter from
+  rangeTo:'',           // inscription range filter to
+  satribute:'',         // satribute filter
+  items:[], off:0, hasMore:true, loading:false, src:null,
+  wallet:null, sel:null, aux:[], blockH:949146,
 };
 
 // ── UTILS ────────────────────────────────────────────────────────────────────
@@ -439,12 +467,21 @@ var ago = function(ts){
   if(s<2592000)return Math.floor(s/86400)+'d ago';
   return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
 };
+
+// Get content type definition by id
+function getCT(id){
+  for(var i=0;i<CONTENT_TYPES.length;i++){if(CONTENT_TYPES[i].id===id)return CONTENT_TYPES[i];}
+  return CONTENT_TYPES[0];
+}
+
+// Type label & color from mime
 var tl = function(m){
-  if(!m)return'?';if(m.includes('gif'))return'GIF';
-  if(m.startsWith('image/'))return'IMG';if(m.startsWith('video/'))return'VID';
-  if(m.startsWith('audio/'))return'AUD';if(m==='text/html')return'HTML';
-  if(m==='image/svg+xml')return'SVG';if(m.includes('javascript'))return'JS';
-  if(m==='text/plain')return'TXT';if(m.includes('gltf')||m.includes('model'))return'3D';
+  if(!m)return'?';
+  if(m.includes('gif'))return'GIF';if(m.startsWith('image/'))return'IMG';
+  if(m.startsWith('video/'))return'VID';if(m.startsWith('audio/'))return'AUD';
+  if(m==='text/html')return'HTML';if(m==='image/svg+xml')return'SVG';
+  if(m.includes('javascript'))return'JS';if(m==='text/plain')return'TXT';
+  if(m.includes('gltf')||m.includes('model'))return'3D';
   if(m.includes('markdown'))return'MD';return'FILE';
 };
 var tc = function(m){
@@ -452,205 +489,203 @@ var tc = function(m){
   if(m.startsWith('image/'))return'#3b82f6';if(m.startsWith('video/'))return'#ef4444';
   if(m.startsWith('audio/'))return'#8b5cf6';if(m==='text/html')return'#10b981';
   if(m==='image/svg+xml')return'#ec4899';if(m.includes('javascript'))return'#f59e0b';
-  if(m==='text/plain')return'#64748b';return'#475569';
+  if(m==='text/plain')return'#64748b';if(m.includes('model'))return'#06b6d4';
+  if(m.includes('markdown'))return'#84cc16';return'#475569';
 };
 var rc = function(r){return{uncommon:'#10b981',rare:'#60a5fa',epic:'#a78bfa',legendary:'#f59e0b',mythic:'#ef4444'}[r]||null};
 
 // ── STATUS BAR ───────────────────────────────────────────────────────────────
 function sbar(src,err){
   var b=document.getElementById('sbar');if(!b)return;
-  if(err){
-    b.style.cssText='display:block;padding:5px 20px;font-size:11px;font-weight:600;background:rgba(239,68,68,.07);color:#ef4444;border-bottom:1px solid rgba(239,68,68,.15)';
-    b.innerHTML='&#9888; '+err;
-  }else if(src){
-    b.style.cssText='display:block;padding:5px 20px;font-size:11px;font-weight:600;background:rgba(16,185,129,.05);color:#10b981;border-bottom:1px solid rgba(16,185,129,.1)';
-    b.innerHTML='<span class="live-dot" style="background:#10b981"></span>Live data via '+src;
-  }else{
-    b.style.display='none';
-  }
+  if(err){b.style.cssText='display:block;padding:5px 20px;font-size:11px;font-weight:600;background:rgba(239,68,68,.07);color:#ef4444;border-bottom:1px solid rgba(239,68,68,.15)';b.innerHTML='&#9888; '+err;}
+  else if(src){b.style.cssText='display:block;padding:5px 20px;font-size:11px;font-weight:600;background:rgba(16,185,129,.05);color:#10b981;border-bottom:1px solid rgba(16,185,129,.1)';b.innerHTML='<span class="live-dot" style="background:#10b981"></span>Live data via '+src;}
+  else{b.style.display='none';}
 }
 
 // ── TOAST ────────────────────────────────────────────────────────────────────
-var _toastT=null;
+var _tt=null;
 function toast(msg,dur){
   dur=dur||4000;
   var t=document.getElementById('tst');if(!t)return;
   t.innerHTML='<div class="toast-msg">'+msg+'</div>';
-  if(_toastT)clearTimeout(_toastT);
-  _toastT=setTimeout(function(){if(t)t.innerHTML='';},dur);
+  if(_tt)clearTimeout(_tt);
+  _tt=setTimeout(function(){if(t)t.innerHTML='';},dur);
 }
 
-// ── API ENGINE ───────────────────────────────────────────────────────────────
-// Primary: PROXY → ordinals.com (with Accept:application/json)
-// Fallback: BestInSlot → Ordiscan → seed data
+// ── NORMALIZERS ──────────────────────────────────────────────────────────────
+function nOrd(i){
+  if(!i)return null;
+  var id=i.id||i.inscription_id||'';
+  return{id:id,number:i.number!=null?i.number:i.inscription_number||0,
+    content_type:i.content_type||i.mime_type||'',content_length:i.content_length||0,
+    genesis_block_height:i.height||i.genesis_block_height||0,
+    genesis_timestamp:i.timestamp||i.genesis_timestamp||null,
+    sat_rarity:i.rarity||i.sat_rarity||'common',sat_name:i.sat_name||i.name||'',
+    address:i.address||'',value:i.value||546,
+    collection_name:i.collection_name||'',collection_slug:'',title:i.title||'',
+    parent:i.parent||'',children:i.children||[],
+    preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
+    genesis_tx:(id||'').replace(/i\d+$/,''),_src:'ord'};
+}
+function nBIS(i){
+  if(!i)return null;
+  var id=i.inscription_id||'';
+  return{id:id,number:i.inscription_number!=null?i.inscription_number:0,
+    content_type:i.mime_type||'',content_length:i.content_length||0,
+    genesis_block_height:i.genesis_height||0,genesis_timestamp:i.genesis_ts||null,
+    sat_rarity:i.sat_rarity||'common',sat_name:'',address:i.owner_wallet_addr||'',
+    value:i.output_value||546,collection_name:i.collection_name||'',
+    collection_slug:i.slug||'',title:i.inscription_name||'',
+    parent:'',children:[],
+    preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
+    genesis_tx:(id||'').replace(/i\d+$/,''),_src:'bis'};
+}
 
+// ── API FETCH ────────────────────────────────────────────────────────────────
 function apiFetch(url,opts){
   opts=opts||{};
   var c=new AbortController();
   var t=setTimeout(function(){c.abort();},9000);
-  return fetch(url,Object.assign({},opts,{
-    signal:c.signal,
-    headers:Object.assign({'Accept':'application/json'},opts.headers||{})
-  })).then(function(r){
-    clearTimeout(t);
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    return r.json();
-  }).catch(function(e){clearTimeout(t);throw e;});
+  return fetch(url,Object.assign({},opts,{signal:c.signal,headers:Object.assign({'Accept':'application/json'},opts.headers||{})}))
+    .then(function(r){clearTimeout(t);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
+    .catch(function(e){clearTimeout(t);throw e;});
 }
 
-// Normalize ord node JSON response
-function nOrd(i){
-  if(!i)return null;
-  var id=i.id||i.inscription_id||'';
-  return{
-    id:id,
-    number:i.number!=null?i.number:i.inscription_number||0,
-    content_type:i.content_type||i.mime_type||'',
-    content_length:i.content_length||0,
-    genesis_block_height:i.height||i.genesis_block_height||0,
-    genesis_timestamp:i.timestamp||i.genesis_timestamp||null,
-    sat_rarity:i.rarity||i.sat_rarity||'common',
-    sat_name:i.sat_name||i.name||'',
-    address:i.address||'',
-    value:i.value||546,
-    collection_name:i.collection_name||'',collection_slug:'',
-    title:i.title||'',
-    parent:i.parent||'',
-    children:i.children||[],
-    preview:ORD+'/preview/'+id,
-    content:ORD+'/content/'+id,
-    genesis_tx:(id||'').replace(/i\d+$/,''),
-    _src:'ord'
-  };
+// Build BIS query params from current state
+function bisSortParam(){
+  if(ST.sort==='oldest')return'&sort_by=inscr_num&order=asc';
+  if(ST.sort==='highest')return'&sort_by=inscr_num&order=desc';
+  if(ST.sort==='lowest')return'&sort_by=inscr_num&order=asc';
+  if(ST.sort==='rare')return'&sort_by=sat_rarity&order=desc';
+  return'&sort_by=inscr_num&order=desc'; // newest default
 }
 
-// Normalize BestInSlot response
-function nBIS(i){
-  if(!i)return null;
-  var id=i.inscription_id||'';
-  return{
-    id:id,
-    number:i.inscription_number!=null?i.inscription_number:0,
-    content_type:i.mime_type||'',content_length:i.content_length||0,
-    genesis_block_height:i.genesis_height||0,
-    genesis_timestamp:i.genesis_ts||null,
-    sat_rarity:i.sat_rarity||'common',sat_name:'',
-    address:i.owner_wallet_addr||'',value:i.output_value||546,
-    collection_name:i.collection_name||'',collection_slug:i.slug||'',
-    title:i.inscription_name||'',parent:'',children:[],
-    preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
-    genesis_tx:(id||'').replace(/i\d+$/,''),_src:'bis'
-  };
+function bisRangeParam(){
+  var p='';
+  if(ST.rangeFrom)p+='&from_number='+encodeURIComponent(ST.rangeFrom);
+  if(ST.rangeTo)p+='&to_number='+encodeURIComponent(ST.rangeTo);
+  return p;
 }
 
-// Seed fallback items (real IDs, renders via ordinals.com iframes)
-function seedItems(off){
-  off=off||0;
-  return SEEDS.slice(0,24).map(function(id,i){
-    return{
-      id:id,number:126393671-(off+i)*7,content_type:'',content_length:0,
+function fetchFeed(off,ct){
+  var CT=getCT(ct);
+  var mimes=CT.mime||null;
+
+  // Special: Bitmap — BIS has dedicated bitmap endpoint
+  if(ct==='bitmap'){
+    return apiFetch(BIS+'/bitmap/all?offset='+off+'&count=24&order='+(ST.sort==='oldest'?'asc':'desc')).then(function(d){
+      var r=(d.data||[]).map(function(b){
+        return{id:b.inscription_id||'',number:b.inscription_number||0,
+          content_type:'text/plain',content_length:0,
+          genesis_block_height:b.genesis_height||0,genesis_timestamp:b.genesis_ts||null,
+          sat_rarity:b.sat_rarity||'common',sat_name:'',address:b.owner_wallet_addr||'',
+          value:546,collection_name:'',collection_slug:'',
+          title:b.bitmap_number!=null?b.bitmap_number+'.bitmap':'',
+          parent:'',children:[],
+          preview:ORD+'/preview/'+(b.inscription_id||''),
+          content:ORD+'/content/'+(b.inscription_id||''),
+          genesis_tx:(b.inscription_id||'').replace(/i\d+$/,''),
+          _bitmap:b.bitmap_number,_src:'bis'};
+      }).filter(Boolean);
+      if(r.length)return{r:r,src:'BestInSlot (Bitmap)',err:null};
+      throw new Error('empty');
+    }).catch(function(){return seedFallback(off,ct);});
+  }
+
+  // Special: Parents — inscriptions that have children
+  if(ct==='parent'){
+    return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24&has_children=true'+bisSortParam()+bisRangeParam()).then(function(d){
+      var r=(d.data||[]).map(nBIS).filter(Boolean);
+      if(r.length)return{r:r,src:'BestInSlot (Parents)',err:null};
+      throw new Error('empty');
+    }).catch(function(){return seedFallback(off,ct);});
+  }
+
+  // Special: Games — HTML inscriptions tagged as games by BIS
+  if(ct==='game'){
+    return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24&mime_type=text%2Fhtml&is_game=true'+bisSortParam()).then(function(d){
+      var r=(d.data||[]).map(nBIS).filter(Boolean);
+      if(r.length)return{r:r,src:'BestInSlot (Games)',err:null};
+      throw new Error('empty');
+    }).catch(function(){
+      // Fallback: just HTML
+      return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24&mime_type=text%2Fhtml'+bisSortParam()).then(function(d){
+        var r=(d.data||[]).map(nBIS).filter(Boolean);
+        if(r.length)return{r:r,src:'BestInSlot (HTML/Games)',err:null};
+        throw new Error('empty');
+      }).catch(function(){return seedFallback(off,ct);});
+    });
+  }
+
+  // Standard: proxy → BIS → Ordiscan → seed
+  var proxyPath='/inscriptions'+(ST.sort==='oldest'?'/0':''+(Math.floor(off/20)>0?'/'+Math.floor(off/20):''));
+  return apiFetch(PROXY+proxyPath).then(function(d){
+    var ids=d.inscriptions||[];
+    if(!ids.length)throw new Error('empty');
+    var r=ids.slice(0,24).map(function(id){
+      return{id:id,number:0,content_type:'',content_length:0,genesis_block_height:0,
+        genesis_timestamp:null,sat_rarity:'common',sat_name:'',address:'',value:546,
+        collection_name:'',collection_slug:'',title:'',parent:'',children:[],
+        preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
+        genesis_tx:id.replace(/i\d+$/,''),_ord:true};
+    });
+    return{r:r,src:'ordinals.com (proxy)',err:null};
+  }).catch(function(){
+    // BIS fallback
+    var mq=mimes?('&mime_type='+encodeURIComponent(mimes.split(',')[0])):'';
+    return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24'+bisSortParam()+mq+bisRangeParam()).then(function(d){
+      var r=(d.data||[]).map(nBIS).filter(Boolean);
+      if(r.length)return{r:r,src:'BestInSlot',err:null};
+      throw new Error('empty');
+    }).catch(function(){
+      return apiFetch(ORDSCAN+'/inscriptions?page='+(Math.floor(off/24)+1)).then(function(d){
+        var r=(d.data||d.results||[]).map(nOrd).filter(Boolean);
+        if(r.length)return{r:r,src:'Ordiscan',err:null};
+        throw new Error('empty');
+      }).catch(function(){return seedFallback(off,ct);});
+    });
+  });
+}
+
+function seedFallback(off,ct){
+  var r=SEEDS.slice(0,24).map(function(id,i){
+    return{id:id,number:126393671-(off+i)*7,content_type:'',content_length:0,
       genesis_block_height:949146-Math.floor((off+i)/10),
       genesis_timestamp:new Date(Date.now()-(off+i)*90000).toISOString(),
       sat_rarity:'common',sat_name:'',address:'',value:546,
       collection_name:'',collection_slug:'',title:'',parent:'',children:[],
       preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
-      genesis_tx:id.replace(/i\d+$/,''),_seed:true
-    };
+      genesis_tx:id.replace(/i\d+$/,''),_seed:true};
   });
+  return{r:r,src:'ordinals.com (seed)',
+    err:'APIs unavailable &mdash; showing known inscriptions. <a href="https://github.com/Web3StudioTech/OrdExplorer" target="_blank" style="color:#f7931a">Deploy the proxy</a> for live data.'};
 }
 
-// Fetch inscription feed
-function fetchFeed(off,filter){
-  var mime={Images:'image/png',GIFs:'image/gif',Text:'text/plain',
-    Videos:'video/mp4',Audio:'audio/mpeg',SVGs:'image/svg+xml',
-    HTML:'text/html',JS:'application/javascript','3D':'model/gltf-binary',
-    Runes:'text/plain'}[filter]||null;
-
-  // Try 1: ordinals.com via proxy (paginated by page number)
-  var page=Math.floor(off/20);
-  return apiFetch(PROXY+'/inscriptions'+(page>0?'/'+page:'')).then(function(d){
-    // ord returns {inscriptions:[...ids...], more:bool, page_index:N}
-    var ids=d.inscriptions||[];
-    if(!ids.length)throw new Error('empty');
-    // Convert bare IDs to minimal items (previews render via ORD iframes)
-    var items=ids.slice(0,24).map(function(id,i){
-      return{id:id,number:0,content_type:'',content_length:0,
-        genesis_block_height:0,genesis_timestamp:null,
-        sat_rarity:'common',sat_name:'',address:'',value:546,
-        collection_name:'',collection_slug:'',title:'',parent:'',children:[],
-        preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
-        genesis_tx:id.replace(/i\d+$/,''),_ord:true};
-    });
-    return{r:items,src:'ordinals.com (live)',err:null};
-  }).catch(function(){
-    // Try 2: BestInSlot
-    var mq=mime?'&mime_type='+encodeURIComponent(mime):'';
-    return apiFetch('https://api.bestinslot.xyz/v3/inscription/all?offset='+off+'&count=24&sort_by=inscr_num&order=desc'+mq).then(function(d){
-      var r=(d.data||[]).map(nBIS).filter(Boolean);
-      if(!r.length)throw new Error('empty');
-      return{r:r,src:'BestInSlot',err:null};
-    }).catch(function(){
-      // Try 3: Ordiscan
-      return apiFetch('https://api.ordiscan.com/v1/inscriptions?page='+(Math.floor(off/24)+1)).then(function(d){
-        var r=(d.data||d.results||[]).map(nOrd).filter(Boolean);
-        if(!r.length)throw new Error('empty');
-        return{r:r,src:'Ordiscan',err:null};
-      }).catch(function(){
-        // Final: seed data
-        return{r:seedItems(off),src:'ordinals.com (seed)',
-          err:'APIs unavailable &mdash; showing known inscriptions. Deploy the proxy for live data.'};
-      });
-    });
-  });
-}
-
-// Fetch single inscription metadata
 function fetchOne(id){
   return apiFetch(PROXY+'/inscription/'+id).then(function(d){
-    var item=nOrd(d);
-    if(item&&item.id)return{data:item,src:'ordinals.com'};
-    throw new Error('empty');
+    var item=nOrd(d);if(item&&item.id)return{data:item,src:'ordinals.com'};throw new Error('empty');
   }).catch(function(){
-    return apiFetch('https://api.bestinslot.xyz/v3/inscription/single_info_id?inscription_id='+encodeURIComponent(id)).then(function(d){
-      var item=nBIS(d.data||d);
-      if(item&&item.id)return{data:item,src:'BestInSlot'};
-      throw new Error('empty');
-    }).catch(function(){
-      return{data:null,src:null};
-    });
+    return apiFetch(BIS+'/inscription/single_info_id?inscription_id='+encodeURIComponent(id)).then(function(d){
+      var item=nBIS(d.data||d);if(item&&item.id)return{data:item,src:'BestInSlot'};throw new Error('empty');
+    }).catch(function(){return{data:null,src:null};});
   });
 }
 
-// Fetch address portfolio
 function fetchAddr(addr){
-  // 1. Wallet native APIs (no CORS)
+  // Wallet native first
   if(ST.wallet){
     if(ST.wallet.type==='unisat'&&window.unisat&&window.unisat.getInscriptions){
       return window.unisat.getInscriptions(0,100).then(function(res){
         var list=(res&&res.list)||[];
-        return{r:list.map(function(i){
-          return{id:i.inscriptionId||'',number:i.inscriptionNumber||0,
-            content_type:'image/png',content_length:0,genesis_block_height:0,
-            genesis_timestamp:null,sat_rarity:'common',sat_name:'',
-            address:addr,value:546,collection_name:i.collectionName||'',
-            collection_slug:'',title:'',parent:'',children:[],
-            preview:ORD+'/preview/'+(i.inscriptionId||''),
-            content:ORD+'/content/'+(i.inscriptionId||''),genesis_tx:''};
-        }),src:'UniSat Wallet'};
+        if(list.length)return{r:list.map(function(i){return mkWI(i.inscriptionId,i.inscriptionNumber,i.collectionName,addr);}),src:'UniSat Wallet'};
+        throw new Error('empty');
       }).catch(function(){return fetchAddrAPI(addr);});
     }
     if(ST.wallet.type==='okx'&&window.okxwallet&&window.okxwallet.bitcoin&&window.okxwallet.bitcoin.getInscriptions){
       return window.okxwallet.bitcoin.getInscriptions(0,100).then(function(res){
         var list=(res&&res.list)||[];
-        return{r:list.map(function(i){
-          return{id:i.inscriptionId||'',number:i.inscriptionNumber||0,
-            content_type:'image/png',content_length:0,genesis_block_height:0,
-            genesis_timestamp:null,sat_rarity:'common',sat_name:'',
-            address:addr,value:546,collection_name:i.collectionName||'',
-            collection_slug:'',title:'',parent:'',children:[],
-            preview:ORD+'/preview/'+(i.inscriptionId||''),
-            content:ORD+'/content/'+(i.inscriptionId||''),genesis_tx:''};
-        }),src:'OKX Wallet'};
+        if(list.length)return{r:list.map(function(i){return mkWI(i.inscriptionId,i.inscriptionNumber,i.collectionName,addr);}),src:'OKX Wallet'};
+        throw new Error('empty');
       }).catch(function(){return fetchAddrAPI(addr);});
     }
     if(ST.wallet.type==='xverse'){
@@ -659,17 +694,9 @@ function fetchAddr(addr){
         return sc.request('ord_getInscriptions',{limit:100,offset:0}).then(function(res){
           if(res&&res.status==='success'){
             var ins=(res.result&&res.result.inscriptions)||[];
-            return{r:ins.map(function(i){
-              return{id:i.inscriptionId||'',number:i.inscriptionNumber||0,
-                content_type:'image/png',content_length:0,genesis_block_height:0,
-                genesis_timestamp:null,sat_rarity:'common',sat_name:'',
-                address:addr,value:546,collection_name:i.collectionName||'',
-                collection_slug:'',title:'',parent:'',children:[],
-                preview:ORD+'/preview/'+(i.inscriptionId||''),
-                content:ORD+'/content/'+(i.inscriptionId||''),genesis_tx:''};
-            }),src:'Xverse Wallet'};
+            if(ins.length)return{r:ins.map(function(i){return mkWI(i.inscriptionId,i.inscriptionNumber,i.collectionName,addr);}),src:'Xverse Wallet'};
           }
-          throw new Error('no data');
+          throw new Error('empty');
         }).catch(function(){return fetchAddrAPI(addr);});
       }
     }
@@ -677,106 +704,96 @@ function fetchAddr(addr){
   return fetchAddrAPI(addr);
 }
 
+function mkWI(id,num,col,addr){
+  return{id:id||'',number:num||0,content_type:'image/png',content_length:0,genesis_block_height:0,
+    genesis_timestamp:null,sat_rarity:'common',sat_name:'',address:addr,value:546,
+    collection_name:col||'',collection_slug:'',title:'',parent:'',children:[],
+    preview:ORD+'/preview/'+(id||''),content:ORD+'/content/'+(id||''),genesis_tx:''};
+}
+
 function fetchAddrAPI(addr){
-  // Try proxy first
   return apiFetch(PROXY+'/address/'+encodeURIComponent(addr)).then(function(d){
     var ids=d.inscriptions||[];
-    if(!ids.length&&!d.outputs)throw new Error('empty');
-    var items=ids.slice(0,60).map(function(id){
+    var r=ids.slice(0,60).map(function(id){
       return{id:id,number:0,content_type:'',content_length:0,genesis_block_height:0,
         genesis_timestamp:null,sat_rarity:'common',sat_name:'',address:addr,value:546,
         collection_name:'',collection_slug:'',title:'',parent:'',children:[],
         preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,genesis_tx:id.replace(/i\d+$/,'')};
     });
-    return{r:items,src:'ordinals.com',extra:d};
+    return{r:r,src:'ordinals.com',extra:d};
   }).catch(function(){
-    return apiFetch('https://api.bestinslot.xyz/v3/wallet/inscriptions?address='+encodeURIComponent(addr)+'&sort_by=inscr_num&order=desc&offset=0&count=60').then(function(d){
-      var r=(d.data||[]).map(nBIS).filter(Boolean);
-      return{r:r,src:'BestInSlot'};
-    }).catch(function(){
-      return{r:[],src:'&mdash;'};
-    });
+    return apiFetch(BIS+'/wallet/inscriptions?address='+encodeURIComponent(addr)+'&sort_by=inscr_num&order=desc&offset=0&count=60').then(function(d){
+      return{r:(d.data||[]).map(nBIS).filter(Boolean),src:'BestInSlot'};
+    }).catch(function(){return{r:[],src:'&mdash;'};});
   });
 }
 
 function fetchBlock(h){
   return apiFetch(PROXY+'/block/'+h).then(function(d){
     var ids=d.inscriptions||[];
-    var items=ids.map(function(id){
-      return{id:id,number:0,content_type:'',content_length:0,
-        genesis_block_height:h,genesis_timestamp:null,
-        sat_rarity:'common',sat_name:'',address:'',value:546,
+    return{r:ids.map(function(id){
+      return{id:id,number:0,content_type:'',content_length:0,genesis_block_height:h,
+        genesis_timestamp:null,sat_rarity:'common',sat_name:'',address:'',value:546,
         collection_name:'',collection_slug:'',title:'',parent:'',children:[],
-        preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,genesis_tx:id.replace(/i\d+$/,''),_ord:true};
-    });
-    return{r:items,src:'ordinals.com',blockData:d};
+        preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,genesis_tx:id.replace(/i\d+$/,'')};
+    }),src:'ordinals.com',blockData:d};
   }).catch(function(){
-    return apiFetch('https://api.bestinslot.xyz/v3/inscription/new_inscriptions_in_block?block_height='+h).then(function(d){
-      var r=(d.data||[]).map(nBIS).filter(Boolean);
-      return{r:r,src:'BestInSlot'};
-    }).catch(function(){
-      return{r:[],src:null};
-    });
+    return apiFetch(BIS+'/inscription/new_inscriptions_in_block?block_height='+h).then(function(d){
+      return{r:(d.data||[]).map(nBIS).filter(Boolean),src:'BestInSlot',blockData:null};
+    }).catch(function(){return{r:[],src:null,blockData:null};});
   });
 }
 
 function fetchSat(sat){
-  return apiFetch(PROXY+'/sat/'+sat).then(function(d){
-    return{data:d,src:'ordinals.com'};
-  }).catch(function(){
-    return{data:null,src:null};
-  });
-}
-
-function fetchBlocks(){
-  return apiFetch(PROXY+'/blocks').then(function(d){
-    return{data:d,src:'ordinals.com'};
-  }).catch(function(){
-    return{data:null,src:null};
-  });
+  return apiFetch(PROXY+'/sat/'+sat).then(function(d){return{data:d,src:'ordinals.com'};})
+    .catch(function(){return{data:null,src:null};});
 }
 
 function fetchCollection(slug){
-  return apiFetch('https://api.bestinslot.xyz/v3/collection/inscriptions?slug='+encodeURIComponent(slug)+'&sort_by=inscr_num&order=asc&offset=0&count=24').then(function(d){
-    var r=(d.data||[]).map(nBIS).filter(Boolean);
-    return{r:r,src:'BestInSlot'};
-  }).catch(function(){
-    return{r:[],src:null};
-  });
+  return apiFetch(BIS+'/collection/inscriptions?slug='+encodeURIComponent(slug)+'&sort_by=inscr_num&order=asc&offset=0&count=24').then(function(d){
+    return{r:(d.data||[]).map(nBIS).filter(Boolean),src:'BestInSlot'};
+  }).catch(function(){return{r:[],src:null};});
 }
 
-function fetchRunes(off){
-  // ordinals.com has /runes endpoint
-  return apiFetch(PROXY+'/runes'+(off?'/'+(Math.floor(off/20)):'')).then(function(d){
-    return{data:d,src:'ordinals.com'};
-  }).catch(function(){
-    return{data:null,src:null};
-  });
-}
-
-// ── CARD HTML ────────────────────────────────────────────────────────────────
+// ── CARD ─────────────────────────────────────────────────────────────────────
 function cardHTML(item,onclick,delay){
   delay=delay||0;
   var rclr=rc(item.sat_rarity);
   var preview=item.preview||ORD+'/preview/'+(item.id||'');
+  var isBitmap=item._bitmap!=null;
+  var label=isBitmap?(item._bitmap+'.bitmap'):(item.title||('#'+fn(item.number)));
+
+  var mediaInner;
+  if(isBitmap){
+    // Bitmap: show number.bitmap display instead of iframe (they're just text)
+    mediaInner='<div class="bitmap-preview">'
+      +'<div class="bitmap-num">'+item._bitmap+'</div>'
+      +'<div class="bitmap-label">.BITMAP</div>'
+      +'</div>';
+  } else if(preview){
+    mediaInner='<iframe src="'+preview+'" sandbox="allow-scripts allow-same-origin" loading="lazy" style="width:100%;height:100%" title="'+label+'"></iframe>';
+  } else {
+    mediaInner='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#1a2535;font-size:32px">&#8982;</div>';
+  }
+
   return '<div class="card fade" onclick="'+onclick+'" style="animation-delay:'+delay.toFixed(2)+'s">'
     +'<div class="card-media">'
-    +(preview
-      ?'<iframe src="'+preview+'" sandbox="allow-scripts allow-same-origin" loading="lazy" title="Inscription '+fn(item.number)+'"></iframe>'
-      :'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#1a2535;font-size:32px">\u2318</div>')
-    +'<span class="badge" style="background:'+tc(item.content_type)+'">'+tl(item.content_type)+'</span>'
+    +mediaInner
+    +'<span class="badge" style="background:'+(isBitmap?'#fbbf24':tc(item.content_type))+'">'+
+      (isBitmap?'BMP':tl(item.content_type))+'</span>'
     +(rclr?'<span class="rbadge" style="background:'+rclr+'22;color:'+rclr+'">'+(item.sat_rarity||'').slice(0,3).toUpperCase()+'</span>':'')
+    +(item.sat_name?'<span class="bitmap-badge">'+item.sat_name+'</span>':'')
     +(item.collection_name?'<div class="colbadge">'+item.collection_name+'</div>':'')
     +'</div>'
     +'<div class="card-body">'
-    +'<div class="card-num">'+(item.title||('#'+fn(item.number)))+'</div>'
+    +'<div class="card-num">'+label+'</div>'
     +'<div class="card-meta"><span>'+ago(item.genesis_timestamp)+'</span><span>Blk '+fn(item.genesis_block_height)+'</span></div>'
     +'</div>'
     +'</div>';
 }
 
 function skCard(){
-  return '<div class="card" style="cursor:default">'
+  return'<div class="card" style="cursor:default">'
     +'<div class="card-media sk"></div>'
     +'<div class="card-body">'
     +'<div class="sk" style="height:12px;width:55%;margin-bottom:7px"></div>'
@@ -787,88 +804,123 @@ function skCards(n){return Array.from({length:n||24}).map(skCard).join('');}
 
 // ── NAV ──────────────────────────────────────────────────────────────────────
 function setNav(p){
-  ['home','collections','runes','blocks','stats'].forEach(function(n){
-    var b=document.getElementById('n-'+n);
-    if(b)b.className='nl'+(n===p?' on':'');
+  ['home','collections','runes','blocks','sats','stats'].forEach(function(n){
+    var b=document.getElementById('n-'+n);if(b)b.className='nl'+(n===p?' on':'');
   });
 }
-
-// ── PAGE ROUTER ───────────────────────────────────────────────────────────────
-function go(p){
-  ST.page=p;setNav(p);
+function go(p){ST.page=p;setNav(p);
   if(p==='home')renderHome();
   else if(p==='collections')renderCollections();
   else if(p==='runes')renderRunes();
   else if(p==='blocks')renderBlocks();
+  else if(p==='sats')renderSats();
   else if(p==='stats')renderStats();
 }
 
-// ── HOME / FEED ───────────────────────────────────────────────────────────────
-var FILTERS=['All','Images','GIFs','Text','Videos','Audio','SVGs','HTML','JS','3D'];
-
+// ── HOME PAGE — FULL FILTER SYSTEM ───────────────────────────────────────────
 function renderHome(){
   setNav('home');sbar(null,null);
-  var pg=document.getElementById('pg');
-  pg.className='fade';
+  var pg=document.getElementById('pg');pg.className='fade';
+
+  // Build content type tabs (matching ord.io exactly)
+  var typeTabs=CONTENT_TYPES.map(function(ct){
+    var extra='';
+    if(ct.id==='bitmap')extra=' tab-bitmap';
+    if(ct.id==='game')extra=' tab-game';
+    if(ct.id==='parent')extra=' tab-special';
+    return'<button class="tab'+extra+(ST.contentType===ct.id?' on':'')+'" onclick="setContentType(\''+ct.id+'\')">'+ct.label+'</button>';
+  }).join('');
+
+  // Trending tabs (1H 1D 1W 1M All)
+  var trendTabs=TRENDING.map(function(t){
+    return'<button class="tab'+(ST.trending===t.id?' on':'')+'" onclick="setTrending(\''+t.id+'\')" style="font-size:10px;padding:3px 9px">'+t.label+'</button>';
+  }).join('');
+
+  // Sort buttons
+  var sortBtns=SORT_OPTS.map(function(s){
+    return'<button class="sort-btn'+(ST.sort===s.id?' on':'')+'" onclick="setSort(\''+s.id+'\')">'+s.label+'</button>';
+  }).join('');
+
   pg.innerHTML=
-    '<div class="hero-strip">'
+    // Hero
+    '<div style="padding:16px 20px 12px;border-bottom:1px solid #141f2e;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">'
       +'<div>'
-        +'<div class="hero-title">Bitcoin Inscriptions</div>'
-        +'<div class="hero-sub">~126M+ inscriptions on-chain &middot; ordinals.com &rarr; BestInSlot &rarr; Ordiscan &middot; Content via ordinals.com</div>'
+        +'<div style="font-size:19px;font-weight:800;color:#f7931a;letter-spacing:-.3px">Bitcoin Inscriptions</div>'
+        +'<div style="font-size:11px;color:#304055;margin-top:3px">~126M+ on-chain &middot; ordinals.com &rarr; BestInSlot &rarr; Ordiscan</div>'
       +'</div>'
-      +'<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap">'
-        +'<span style="font-size:10px;font-weight:700;color:#304055;margin-right:3px">ORDER</span>'
-        +['Newest','Oldest','Rare'].map(function(s){
-          return '<button id="s-'+s+'" onclick="setSort(\''+s+'\')" style="padding:3px 9px;border-radius:5px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:'+(s==='Newest'?'#f7931a':'transparent')+';color:'+(s==='Newest'?'#000':'#304055')+';transition:all .13s;font-family:inherit">'+s+'</button>';
+      +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
+        +'<span style="font-size:10px;font-weight:700;color:#304055">TRENDING</span>'
+        +trendTabs
+      +'</div>'
+    +'</div>'
+    // Filter bar — content types
+    +'<div id="filter-wrap">'
+      +'<div class="fbar-row">'+typeTabs+'</div>'
+      // Sort row + Range filter + Satributes
+      +'<div class="sort-row">'
+        +'<span class="sort-label">SORT</span>'
+        +sortBtns
+        +'<div class="fdivider"></div>'
+        +'<span class="sort-label">RANGE</span>'
+        +'<input class="range-input" id="rf" placeholder="From #" value="'+ST.rangeFrom+'" oninput="ST.rangeFrom=this.value">'
+        +'<span style="font-size:11px;color:#304055">&rarr;</span>'
+        +'<input class="range-input" id="rt" placeholder="To #" value="'+ST.rangeTo+'" oninput="ST.rangeTo=this.value">'
+        +'<button class="go-btn" onclick="applyRange()">Go</button>'
+        +'<div class="fdivider"></div>'
+        +'<span class="sort-label">SATRIBUTES</span>'
+        +['','uncommon','rare','epic','legendary','mythic','pizza','vintage','black','omega'].map(function(s){
+          return'<button class="tab tab-special'+(ST.satribute===s&&s?' on':'')+'" onclick="setSatribute(\''+s+'\')" style="font-size:10px;padding:3px 9px">'+(s?s.charAt(0).toUpperCase()+s.slice(1):'All')+'</button>';
         }).join('')
       +'</div>'
     +'</div>'
-    +'<div class="filter-bar" id="fbar">'
-      +FILTERS.map(function(f){return'<button class="tab'+(f===ST.filter?' on':'')+'" onclick="setFilter(\''+f+'\')" >'+f+'</button>';}).join('')
-      +'<div style="width:1px;background:#141f2e;flex-shrink:0;margin:3px 3px"></div>'
-      +'<button class="tab" style="border-color:rgba(167,139,250,.3);color:#a78bfa">Satributes &#10022;</button>'
-    +'</div>'
+    // Source indicator
     +'<div class="src-row"><span class="live-dot" style="background:#10b981"></span><span id="src-txt">Connecting&hellip;</span></div>'
+    // Grid
     +'<div class="grid" id="cg">'+skCards()+'</div>'
     +'<div style="text-align:center;padding:4px 0 36px" id="lmw"></div>';
+
   loadFeed(true);
 }
 
 function loadFeed(reset){
-  if(ST.loading)return;
-  ST.loading=true;
+  if(ST.loading)return;ST.loading=true;
   var off=reset?0:ST.off;
   if(reset){ST.items=[];ST.off=0;ST.hasMore=true;}
   var cg=document.getElementById('cg'),lmw=document.getElementById('lmw');
-  if(cg&&reset)cg.innerHTML=skCards();
-  if(lmw)lmw.innerHTML='';
-  fetchFeed(off,ST.filter).then(function(res){
+  if(cg&&reset)cg.innerHTML=skCards();if(lmw)lmw.innerHTML='';
+  fetchFeed(off,ST.contentType).then(function(res){
     ST.items=reset?res.r:ST.items.concat(res.r);
     ST.off=ST.items.length;ST.hasMore=res.r.length>=20;ST.src=res.src;
     sbar(res.err?null:res.src,res.err);
     var st=document.getElementById('src-txt');
-    if(st)st.textContent=res.err?'APIs unavailable \u2014 showing seed inscriptions':fn(ST.items.length)+' inscriptions \u00b7 via '+res.src;
+    if(st)st.innerHTML=res.err?'APIs unavailable \u2014 showing seed inscriptions':fn(ST.items.length)+' inscriptions \u00b7 via '+res.src;
     if(cg){
       if(reset)cg.innerHTML='';
-      var len=ST.items.length-res.r.length;
-      cg.innerHTML+=res.r.map(function(item,i){return cardHTML(item,'openIns('+(len+i)+')',i*0.022);}).join('');
+      var base=ST.items.length-res.r.length;
+      cg.innerHTML+=res.r.map(function(item,i){return cardHTML(item,'openIns('+(base+i)+')',i*0.022);}).join('');
     }
     if(lmw&&ST.hasMore)lmw.innerHTML='<button class="load-more" onclick="loadFeed()">Load More</button>';
     ST.loading=false;
   });
 }
 
-function setFilter(f){
-  ST.filter=f;
-  document.querySelectorAll('.tab').forEach(function(b){b.className='tab'+(b.textContent===f?' on':'');});
-  loadFeed(true);
+// Filter setters — each resets the feed
+function setContentType(id){
+  ST.contentType=id;
+  // Update URL param (for shareability)
+  if(history.replaceState)history.replaceState(null,'','?content-type='+id);
+  renderHome();
 }
-function setSort(s){
-  ['Newest','Oldest','Rare'].forEach(function(n){
-    var b=document.getElementById('s-'+n);
-    if(b){b.style.background=n===s?'#f7931a':'transparent';b.style.color=n===s?'#000':'#304055';}
-  });
-  loadFeed(true);
+function setTrending(id){ST.trending=id;loadFeed(true);}
+function setSort(id){ST.sort=id;loadFeed(true);}
+function applyRange(){loadFeed(true);}
+function setSatribute(s){ST.satribute=s;loadFeed(true);}
+
+// Read URL params on load
+function readUrlParams(){
+  var params=new URLSearchParams(window.location.search);
+  var ct=params.get('content-type');
+  if(ct){ST.contentType=ct;}
 }
 
 // ── INSCRIPTION DETAIL ────────────────────────────────────────────────────────
@@ -888,40 +940,39 @@ function renderDetail(item){
     {n:'Magisat',         u:'https://magisat.io/inscription/'+item.id},
     {n:'Satflow',         u:'https://satflow.com/inscription/'+item.id},
   ];
+  var isBitmap=item._bitmap!=null;
   pg.innerHTML=
     '<div class="detail-wrap">'
-      +'<button class="back-btn" onclick="renderHome()">'
-        +'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>'
-        +'Back to Feed'
+      +'<button class="back-btn" onclick="go(ST.page===\'home\'?\'home\':ST.page)">'
+        +'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Back'
       +'</button>'
       +'<div class="detail-grid">'
 
-        // LEFT COL
+        // LEFT
         +'<div>'
           +'<div style="aspect-ratio:1;background:#050810;border-radius:14px;border:1px solid #141f2e;overflow:hidden;position:relative">'
-            +'<iframe src="'+item.preview+'" sandbox="allow-scripts allow-same-origin" style="width:100%;height:100%" title="Inscription '+fn(item.number)+'"></iframe>'
-            +'<span class="badge" style="background:'+tc(item.content_type)+';top:10px;left:10px;font-size:10px;padding:3px 8px">'+tl(item.content_type)+'</span>'
+            +(isBitmap
+              ?'<div class="bitmap-preview" style="border-radius:14px"><div style="font-size:60px;font-weight:900;color:#fbbf24">'+item._bitmap+'</div><div class="bitmap-label" style="font-size:14px">.BITMAP</div></div>'
+              :'<iframe src="'+item.preview+'" sandbox="allow-scripts allow-same-origin" style="width:100%;height:100%" title="Inscription '+fn(item.number)+'"></iframe>')
+            +'<span class="badge" style="background:'+(isBitmap?'#fbbf24':tc(item.content_type))+';top:10px;left:10px;font-size:10px;padding:3px 8px">'+(isBitmap?'BITMAP':tl(item.content_type))+'</span>'
           +'</div>'
-          // Action links
           +'<div style="display:flex;gap:7px;margin-top:11px;flex-wrap:wrap">'
             +'<a href="'+item.content+'" target="_blank" class="btn-orange">Raw Content &#8599;</a>'
             +'<a href="'+item.preview+'" target="_blank" class="btn-ghost">Preview &#8599;</a>'
             +'<a href="'+ORD+'/inscription/'+item.id+'" target="_blank" class="btn-ghost">ordinals.com &#8599;</a>'
           +'</div>'
-          // Marketplaces
           +'<div class="surface" style="padding:15px;margin-top:11px">'
-            +'<div class="section-label">View &amp; Trade On</div>'
-            +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
-              +markets.map(function(m){return'<a href="'+m.u+'" target="_blank" class="mlink">'+m.n+' &#8599;</a>';}).join('')
-            +'</div>'
+            +'<div class="section-label">View &amp; Trade</div>'
+            +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+markets.map(function(m){return'<a href="'+m.u+'" target="_blank" class="mlink">'+m.n+' &#8599;</a>';}).join('')+'</div>'
           +'</div>'
         +'</div>'
 
-        // RIGHT COL
+        // RIGHT
         +'<div style="display:flex;flex-direction:column;gap:14px">'
-          // Title
           +'<div>'
-            +'<div style="font-size:22px;font-weight:800;color:#f7931a;letter-spacing:-.3px;margin-bottom:5px">'+(item.title||'Inscription #'+fn(item.number))+'</div>'
+            +'<div style="font-size:22px;font-weight:800;color:#f7931a;letter-spacing:-.3px;margin-bottom:5px">'
+              +(isBitmap?item._bitmap+'.bitmap':'Inscription #'+fn(item.number))
+            +'</div>'
             +(item.collection_name?'<div style="font-size:12px;color:#a78bfa;font-weight:600;margin-bottom:6px;cursor:pointer" onclick="openCollection(\''+item.collection_slug+'\',\''+item.collection_name+'\')">'+item.collection_name+' &rarr;</div>':'')
             +'<div style="font-size:10px;color:#304055;word-break:break-all;line-height:1.7;margin-bottom:10px">'+item.id+'</div>'
             +'<div style="display:flex;gap:7px;flex-wrap:wrap">'
@@ -929,20 +980,17 @@ function renderDetail(item){
               +'<button id="load-btn" onclick="loadMeta(\''+item.id+'\')" class="btn-ghost">Load Full Metadata</button>'
             +'</div>'
           +'</div>'
-          // Metadata
           +'<div class="surface" id="meta-box">'
             +'<div style="padding:10px 16px;border-bottom:1px solid #0e1a28"><div class="section-label" style="margin:0">Metadata</div></div>'
             +buildMeta(item)
           +'</div>'
-          // Satribute
           +(item.sat_rarity&&item.sat_rarity!=='common'
             ?'<div class="surface" style="padding:15px;border-color:'+(rc(item.sat_rarity)||'#141f2e')+'">'
               +'<div class="section-label" style="color:'+(rc(item.sat_rarity)||'#304055')+'">Satribute &#10022;</div>'
-              +'<div style="font-size:17px;font-weight:800;color:'+(rc(item.sat_rarity)||'#fff')+'">'+(item.sat_rarity||'').toUpperCase()+'</div>'
+              +'<div style="font-size:17px;font-weight:800;color:'+(rc(item.sat_rarity)||'#d8e0ea')+'">'+(item.sat_rarity||'').toUpperCase()+'</div>'
               +'<div style="font-size:11px;color:#5a7090;margin-top:3px">This inscription lives on a '+(item.sat_rarity||'')+' satoshi</div>'
             +'</div>'
             :'')
-          // Genesis tx
           +(item.genesis_tx
             ?'<div class="surface" style="padding:15px">'
               +'<div class="section-label">Genesis Transaction</div>'
@@ -950,7 +998,6 @@ function renderDetail(item){
               +'<a href="'+ORD+'/tx/'+item.genesis_tx+'" target="_blank" class="mlink">View on ordinals.com &#8599;</a>'
             +'</div>'
             :'')
-          // Children
           +(item.children&&item.children.length
             ?'<div class="surface" style="padding:15px">'
               +'<div class="section-label">Children ('+item.children.length+')</div>'
@@ -966,50 +1013,40 @@ function renderDetail(item){
 
 function buildMeta(item){
   var rows=[
-    {l:'Inscription #',  v:fn(item.number)},
-    {l:'Content Type',   v:item.content_type||'Unknown'},
-    {l:'Content Size',   v:fb(item.content_length)},
-    {l:'Genesis Block',  v:item.genesis_block_height
-      ?'<a href="'+ORD+'/block/'+item.genesis_block_height+'" target="_blank" style="color:#f7931a;text-decoration:none">'+fn(item.genesis_block_height)+' &#8599;</a>'
-      :'&mdash;'},
-    {l:'Timestamp',      v:item.genesis_timestamp?new Date(item.genesis_timestamp).toUTCString():'&mdash;'},
-    {l:'Sat Rarity',     v:item.sat_rarity||'common', rclr:rc(item.sat_rarity)},
-    {l:'Sat Name',       v:item.sat_name||'&mdash;'},
-    {l:'Value',          v:item.value?fn(item.value)+' sats':'&mdash;'},
-    {l:'Parent',         v:item.parent?'<a href="'+ORD+'/inscription/'+item.parent+'" target="_blank" style="color:#f7931a;font-size:10px">'+si(item.parent)+' &#8599;</a>':'&mdash;'},
-    {l:'Owner',          v:item.address?'<span style="color:#f7931a;cursor:pointer" onclick="openAddr(\''+item.address+'\')">'+sa(item.address)+'</span>':'&mdash;'},
+    {l:'Inscription #',v:fn(item.number)},
+    {l:'Content Type',v:item.content_type||'Unknown'},
+    {l:'Content Size',v:fb(item.content_length)},
+    {l:'Genesis Block',v:item.genesis_block_height?'<a href="'+ORD+'/block/'+item.genesis_block_height+'" target="_blank" style="color:#f7931a;text-decoration:none">'+fn(item.genesis_block_height)+' &#8599;</a>':'&mdash;'},
+    {l:'Timestamp',v:item.genesis_timestamp?new Date(item.genesis_timestamp).toUTCString():'&mdash;'},
+    {l:'Sat Rarity',v:item.sat_rarity||'common',rclr:rc(item.sat_rarity)},
+    {l:'Sat Name',v:item.sat_name||'&mdash;'},
+    {l:'Value',v:item.value?fn(item.value)+' sats':'&mdash;'},
+    {l:'Parent',v:item.parent?'<a href="'+ORD+'/inscription/'+item.parent+'" target="_blank" style="color:#f7931a;font-size:10px">'+si(item.parent)+' &#8599;</a>':'&mdash;'},
+    {l:'Owner',v:item.address?'<span style="color:#f7931a;cursor:pointer" onclick="openAddr(\''+item.address+'\')">'+sa(item.address)+'</span>':'&mdash;'},
   ];
-  return rows.map(function(r,i){
-    return '<div class="meta-row">'
-      +'<span class="meta-label">'+r.l+'</span>'
-      +'<span class="meta-val" style="'+(r.rclr?'color:'+r.rclr+';':'')+'">'+r.v+'</span>'
-      +'</div>';
+  return rows.map(function(r){
+    return'<div class="meta-row"><span class="meta-label">'+r.l+'</span><span class="meta-val" style="'+(r.rclr?'color:'+r.rclr+';':'')+'">'+r.v+'</span></div>';
   }).join('');
 }
 
-function cpID(){
-  if(ST.sel&&navigator.clipboard)
-    navigator.clipboard.writeText(ST.sel.id).then(function(){toast('Inscription ID copied!');});
-}
+function cpID(){if(ST.sel&&navigator.clipboard)navigator.clipboard.writeText(ST.sel.id).then(function(){toast('Inscription ID copied!');});}
 
 function loadMeta(id){
   var btn=document.getElementById('load-btn');
-  if(btn){btn.innerHTML='<span class="spin">&circledot;</span>&nbsp;Loading&hellip;';btn.disabled=true;}
+  if(btn){btn.innerHTML='<span class="spin-el">&circledot;</span>&nbsp;Loading&hellip;';btn.disabled=true;}
   fetchOne(id).then(function(res){
     if(res.data){
       ST.sel=Object.assign({},ST.sel,res.data);
       var mb=document.getElementById('meta-box');
       if(mb)mb.innerHTML='<div style="padding:10px 16px;border-bottom:1px solid #0e1a28"><div class="section-label" style="margin:0">Metadata &middot; via '+res.src+'</div></div>'+buildMeta(res.data);
-      toast('Full metadata loaded via '+res.src);
+      toast('Metadata loaded via '+res.src);
     }else{toast('Metadata unavailable &mdash; view on ordinals.com');}
     if(btn)btn.style.display='none';
   });
 }
 
 // ── ADDRESS PAGE ──────────────────────────────────────────────────────────────
-function openAddr(addr){renderAddr(addr);}
-
-function renderAddr(addr){
+function openAddr(addr){
   setNav(null);sbar(null,null);
   var pg=document.getElementById('pg');pg.className='fade';
   pg.innerHTML=
@@ -1041,6 +1078,7 @@ function renderAddr(addr){
         +'</div>'
       +'</div>'
     +'</div>';
+
   fetchAddr(addr).then(function(res){
     ST.aux=res.r;sbar(res.src,null);
     var rare=res.r.filter(function(x){return x.sat_rarity&&x.sat_rarity!=='common';}).length;
@@ -1049,62 +1087,268 @@ function renderAddr(addr){
     if(ast)ast.innerHTML=[{v:fn(res.r.length),l:'Inscriptions'},{v:fn(rare),l:'Rare Sats'},{v:fn(colls),l:'Collections'},{v:res.src,l:'Data Source'}]
       .map(function(s){return'<div class="stat-card"><div class="stat-val">'+s.v+'</div><div class="stat-label">'+s.l+'</div></div>';}).join('');
     var ag=document.getElementById('addr-grid');
-    if(ag)ag.innerHTML=res.r.length
-      ?res.r.map(function(item,i){return cardHTML(item,'openAux('+i+')',i*0.022);}).join('')
-      :'<div style="grid-column:1/-1;text-align:center;color:#304055;padding:48px;font-size:14px">No inscriptions found</div>';
-    // Show rune balances if available
+    if(ag)ag.innerHTML=res.r.length?res.r.map(function(item,i){return cardHTML(item,'openAux('+i+')',i*0.022);}).join(''):'<div class="no-results">No inscriptions found for this address</div>';
     if(res.extra&&res.extra.runes_balances&&res.extra.runes_balances.length){
-      var ag2=document.getElementById('addr-grid');
-      if(ag2){
-        var rb=res.extra.runes_balances;
-        var runeHtml='<div style="grid-column:1/-1;margin-top:20px">'
-          +'<div class="section-label">Rune Balances</div>'
-          +'<div style="display:flex;flex-wrap:wrap;gap:8px">'
-          +rb.map(function(r){return'<div class="surface" style="padding:10px 14px;display:flex;align-items:center;gap:8px"><span style="font-size:16px">'+(r[2]||'')+'</span><div><div style="font-size:12px;font-weight:700;color:#f7931a">'+fn(parseInt(r[1]))+'</div><div style="font-size:10px;color:#304055">'+r[0]+'</div></div></div>';}).join('')
-          +'</div></div>';
-        ag2.innerHTML+=runeHtml;
-      }
+      if(ag)ag.innerHTML+='<div style="grid-column:1/-1;margin-top:20px"><div class="section-label">Rune Balances</div><div style="display:flex;flex-wrap:wrap;gap:8px">'+res.extra.runes_balances.map(function(r){return'<div class="surface" style="padding:10px 14px;display:flex;align-items:center;gap:8px"><span style="font-size:16px">'+(r[2]||'')+'</span><div><div style="font-size:12px;font-weight:700;color:#f7931a">'+fn(parseInt(r[1]))+'</div><div style="font-size:10px;color:#304055">'+r[0]+'</div></div></div>';}).join('')+'</div></div>';
     }
   });
 }
 
 // ── COLLECTIONS ───────────────────────────────────────────────────────────────
+
+// ── COLLECTIONS DATA ENGINE ─────────────────────────────────────────────────
+// Priority: 1) collections.json (local backup)  2) BestInSlot live  3) hardcoded
+
+var COL_CACHE = [];        // all collections loaded in memory
+var COL_LOADED = false;    // have we loaded the full list yet?
+var COL_OFFSET = 0;        // BIS pagination offset
+var COL_HAS_MORE = true;   // more pages available on BIS
+var COL_LOADING = false;   // currently fetching
+var COL_SOURCE = null;     // where data came from
+
+// Load collections — tries local JSON first, then BIS live
+function loadCollections(onDone){
+  if(COL_LOADED && COL_CACHE.length){onDone(COL_CACHE);return;}
+
+  // Try local collections.json backup first
+  fetch('./collections.json').then(function(r){
+    if(!r.ok)throw new Error('no file');
+    return r.json();
+  }).then(function(d){
+    var list=d.collections||d;
+    if(!Array.isArray(list)||!list.length)throw new Error('empty');
+    COL_CACHE=list;COL_LOADED=true;COL_HAS_MORE=false;
+    COL_SOURCE='collections.json (local backup &middot; '+list.length.toLocaleString()+' collections)';
+    onDone(COL_CACHE);
+  }).catch(function(){
+    // No local file — fetch from BestInSlot live
+    COL_SOURCE='BestInSlot (live)';
+    fetchBISCollections(0,onDone);
+  });
+}
+
+// Fetch one page (100) from BestInSlot
+function fetchBISCollections(offset,onDone){
+  if(COL_LOADING)return;
+  COL_LOADING=true;
+  var url=BIS+'/collection/collections?sort_by=median_number&order=asc&offset='+offset+'&count=100';
+  apiFetch(url).then(function(d){
+    var items=d.data||[];
+    var normalized=items.map(normBISCol).filter(Boolean);
+    COL_CACHE=COL_CACHE.concat(normalized);
+    COL_OFFSET=offset+items.length;
+    COL_HAS_MORE=items.length>=100;
+    COL_LOADING=false;
+    if(onDone)onDone(COL_CACHE);
+  }).catch(function(){
+    COL_LOADING=false;
+    // Return whatever we have so far (or empty)
+    if(onDone)onDone(COL_CACHE);
+  });
+}
+
+// Load NEXT page from BestInSlot (for "Load More" button)
+function loadMoreBISCollections(onDone){
+  if(!COL_HAS_MORE||COL_LOADING){if(onDone)onDone([]);return;}
+  fetchBISCollections(COL_OFFSET,onDone);
+}
+
+// Normalize BestInSlot collection response
+function normBISCol(c){
+  if(!c||!c.slug)return null;
+  return{
+    slug:c.slug,
+    name:c.name||c.slug,
+    supply:parseInt(c.supply)||0,
+    min_number:c.min_number||0,
+    max_number:c.max_number||0,
+    median_number:c.median_number||0,
+    icon:c.icon_url||c.inscription_icon_id||'',
+    bis_url:c.bis_url||('https://bestinslot.xyz/ordinals/collection/'+(c.slug||'')),
+    floor_price:c.floor_price||null,
+    vol_24h:c.vol_24h_in_btc||null,
+    vol_7d:c.vol_7d_in_btc||null,
+    vol_total:c.vol_total_in_btc||null,
+    sale_cnt_total:c.sale_cnt_total||null,
+    listed:c.listed_count||null,
+  };
+}
+
+// Filter collections by search query
+function filterCollections(list,q){
+  if(!q)return list;
+  q=q.toLowerCase();
+  return list.filter(function(c){
+    return (c.name||'').toLowerCase().includes(q)||(c.slug||'').toLowerCase().includes(q);
+  });
+}
+
+// Format floor price from sats
+function fmtFloor(sats){
+  if(!sats)return'&mdash;';
+  var btc=(sats/100000000).toFixed(4);
+  return btc+' BTC';
+}
+function fmtVol(btc){
+  if(!btc)return'&mdash;';
+  return parseFloat(btc).toFixed(2)+' BTC';
+}
+
 function renderCollections(){
   setNav('collections');sbar(null,null);
   var pg=document.getElementById('pg');pg.className='fade';
-  pg.innerHTML=
-    '<div style="max-width:1040px;margin:0 auto;padding:24px 20px">'
-      +'<div class="hero-title" style="margin-bottom:5px">Collections</div>'
-      +'<div class="hero-sub" style="margin-bottom:22px">Notable Bitcoin Ordinals collections &middot; Click to browse inscriptions</div>'
-      +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px">'
-        +COLLECTIONS.map(function(c,i){
-          return '<div class="col-card" onclick="openCollection(\''+c.slug+'\',\''+c.name+'\')" style="padding:17px;animation:fadeUp .28s ease '+(i*.04)+'s both">'
-            +'<div style="width:52px;height:52px;border-radius:10px;background:#050810;border:1px solid #141f2e;margin-bottom:13px;overflow:hidden;flex-shrink:0">'
-              +'<iframe src="'+ORD+'/preview/'+SEEDS[i%SEEDS.length]+'" sandbox="allow-scripts allow-same-origin" loading="lazy" style="width:100%;height:100%;pointer-events:none" title="'+c.name+'"></iframe>'
+  var colSearch='';
+
+  function buildUI(list){
+    // Apply search filter
+    var filtered=filterCollections(list,colSearch);
+
+    pg.innerHTML=
+      '<div style="max-width:1060px;margin:0 auto;padding:24px 20px">'
+        // Header
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">'
+          +'<div>'
+            +'<div style="font-size:19px;font-weight:800;color:#f7931a;letter-spacing:-.3px">Collections</div>'
+            +'<div style="font-size:11px;color:#304055;margin-top:3px" id="col-src">'
+              +(COL_SOURCE?'via '+COL_SOURCE:'Loading...')
             +'</div>'
-            +'<div style="font-size:14px;font-weight:800;color:#d8e0ea;margin-bottom:4px">'+c.name+'</div>'
-            +'<div style="font-size:11px;color:#304055;margin-bottom:11px;line-height:1.4">'+c.desc+'</div>'
-            +'<div style="display:flex;justify-content:space-between;font-size:10px;padding-top:9px;border-top:1px solid #141f2e">'
-              +'<span style="color:#5a7090;font-weight:600">Supply</span>'
-              +'<span style="color:'+c.accent+';font-weight:700">'+fn(c.supply)+'</span>'
+          +'</div>'
+          +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+            // Stats
+            +'<div style="background:#0d1520;border:1px solid #141f2e;border-radius:8px;padding:6px 14px;font-size:11px;color:#5a7090">'
+              +'<span style="color:#f7931a;font-weight:700" id="col-count">'+filtered.length.toLocaleString()+'</span>'
+              +' / <span id="col-total">'+list.length.toLocaleString()+'</span> collections'
             +'</div>'
-          +'</div>';
-        }).join('')
+            // Fetcher link
+            +'<a href="collection-fetcher.html" target="_blank" class="btn-ghost" style="font-size:11px;padding:6px 12px">&#x1F4E6; Open Fetcher</a>'
+          +'</div>'
+        +'</div>'
+        // Search bar
+        +'<div style="display:flex;gap:8px;margin-bottom:16px">'
+          +'<div style="flex:1;display:flex;align-items:center;background:#0d1520;border:1px solid #141f2e;border-radius:8px;padding:0 12px;height:38px;gap:8px">'
+            +'<svg width="13" height="13" fill="none" stroke="#3a5068" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
+            +'<input id="col-search" placeholder="Search collections by name or slug..." '
+              +'style="background:none;border:none;color:#d8e0ea;font-size:13px;flex:1;outline:none;font-family:inherit" '
+              +'oninput="colSearch=this.value;buildUI(COL_CACHE)">'
+          +'</div>'
+          +(COL_HAS_MORE
+            ?'<button onclick="loadMoreCols()" class="btn-ghost" id="load-more-cols" style="font-size:12px;white-space:nowrap">Load More +'+(COL_HAS_MORE?'100':'')+'</button>'
+            :'<span style="font-size:11px;color:#304055;padding:0 12px;align-self:center">All loaded</span>'
+          )
+        +'</div>'
+        // Grid
+        +(filtered.length===0
+          ?'<div style="text-align:center;color:#304055;padding:60px;font-size:14px">No collections found matching "'+colSearch+'"</div>'
+          :'<div id="col-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:13px">'
+            +filtered.slice(0,COL_HAS_MORE?filtered.length:filtered.length).map(function(c,i){
+              return buildColCard(c,i,list);
+            }).join('')
+          +'</div>'
+        )
+        // Load more if live BIS and has more
+        +(COL_HAS_MORE&&!colSearch
+          ?'<div style="text-align:center;margin-top:20px"><button class="load-more" id="lm-btn" onclick="loadMoreCols()">Load More Collections (+100)</button></div>'
+          :'')
+        // Attribution
+        +'<div style="margin-top:22px;padding:13px 16px;background:#0a1018;border:1px solid #141f2e;border-radius:10px;font-size:11px;color:#304055;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
+          +'<span>&#x1F4C2;</span>'
+          +'<span>Data from <a href="https://bestinslot.xyz" target="_blank" style="color:#f7931a">BestInSlot</a> &middot; '
+            +'Source: <a href="https://github.com/ordinals-wallet/ordinals-collections" target="_blank" style="color:#f7931a">ordinals-wallet/ordinals-collections</a> &middot; '
+            +'<a href="collection-fetcher.html" target="_blank" style="color:#f7931a">Download backup &#x2B07;</a></span>'
+        +'</div>'
+      +'</div>';
+  }
+
+  function buildColCard(c,i,fullList){
+    var hasIcon=c.icon&&c.icon.length>4;
+    var hasFloor=c.floor_price!=null;
+    var hasVol=c.vol_total!=null;
+    var inscRange=c.min_number?('#'+fn(c.min_number)+(c.max_number&&c.max_number!==c.min_number?' &rarr; #'+fn(c.max_number):'')):'';
+    // Pick a deterministic accent color based on slug hash
+    var colors=['#f7931a','#10b981','#3b82f6','#8b5cf6','#ef4444','#f59e0b','#ec4899','#06b6d4','#84cc16','#f97316'];
+    var h=0;for(var k=0;k<(c.slug||'').length;k++)h=(h*31+c.slug.charCodeAt(k))&0xfffffff;
+    var accent=colors[h%colors.length];
+    var idx=fullList.indexOf(c);
+
+    return '<div class="card" onclick="openCollection(''+c.slug+'',''+c.name+'')" style="padding:0;overflow:hidden;animation:fadeUp .22s ease '+(Math.min(i,20)*0.025).toFixed(2)+'s both">'
+      // Icon / color header bar
+      +'<div style="height:5px;background:'+accent+'"></div>'
+      +'<div style="padding:14px 14px 0">'
+        +'<div style="display:flex;align-items:center;gap:11px;margin-bottom:10px">'
+          // Icon
+          +'<div style="width:44px;height:44px;border-radius:9px;background:#050810;border:1px solid #141f2e;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center">'
+            +(hasIcon
+              ?'<img src="'+c.icon+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML='<div style=&quot;font-size:18px&quot;>&#x1F539;</div>'">'
+              :'<iframe src="'+ORD+'/preview/'+SEEDS[i%SEEDS.length]+'" sandbox="allow-scripts allow-same-origin" loading="lazy" style="width:100%;height:100%;pointer-events:none" title="'+c.name+'"></iframe>')
+          +'</div>'
+          +'<div style="flex:1;min-width:0">'
+            +'<div style="font-size:13px;font-weight:800;color:#d8e0ea;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c.name+'</div>'
+            +'<div style="font-size:10px;color:#3a5068;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c.slug+'</div>'
+          +'</div>'
+        +'</div>'
+        // Stats row
+        +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">'
+          +'<div style="background:#060b12;border-radius:6px;padding:6px 9px">'
+            +'<div style="font-size:9px;color:#304055;font-weight:700;letter-spacing:.5px">SUPPLY</div>'
+            +'<div style="font-size:12px;font-weight:700;color:'+accent+'">'+fn(c.supply||0)+'</div>'
+          +'</div>'
+          +'<div style="background:#060b12;border-radius:6px;padding:6px 9px">'
+            +'<div style="font-size:9px;color:#304055;font-weight:700;letter-spacing:.5px">FLOOR</div>'
+            +'<div style="font-size:12px;font-weight:700;color:#d8e0ea">'+fmtFloor(c.floor_price)+'</div>'
+          +'</div>'
+          +'<div style="background:#060b12;border-radius:6px;padding:6px 9px">'
+            +'<div style="font-size:9px;color:#304055;font-weight:700;letter-spacing:.5px">VOL TOTAL</div>'
+            +'<div style="font-size:12px;font-weight:700;color:#d8e0ea">'+fmtVol(c.vol_total)+'</div>'
+          +'</div>'
+          +'<div style="background:#060b12;border-radius:6px;padding:6px 9px">'
+            +'<div style="font-size:9px;color:#304055;font-weight:700;letter-spacing:.5px">SALES</div>'
+            +'<div style="font-size:12px;font-weight:700;color:#d8e0ea">'+fn(c.sale_cnt_total)+'</div>'
+          +'</div>'
+        +'</div>'
       +'</div>'
+      // Inscription range footer
+      +(inscRange?'<div style="padding:7px 14px;border-top:1px solid #0e1a28;font-size:9px;color:#3a5068;display:flex;justify-content:space-between;align-items:center">'
+        +'<span>'+inscRange+'</span>'
+        +'<a href="'+c.bis_url+'" target="_blank" onclick="event.stopPropagation()" style="color:#304055;font-size:10px;font-weight:600;text-decoration:none">BIS &#x2197;</a>'
+        +'</div>':'')
     +'</div>';
+  }
+
+  // Initial load
+  var loading_html='<div style="max-width:1060px;margin:0 auto;padding:24px 20px">'
+    +'<div style="font-size:19px;font-weight:800;color:#f7931a;margin-bottom:20px">Collections</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:13px">'
+    +Array.from({length:24}).map(function(){return'<div style="background:#0d1520;border:1px solid #141f2e;border-radius:12px;height:180px" class="sk"></div>';}).join('')
+    +'</div></div>';
+  pg.innerHTML=loading_html;
+
+  loadCollections(function(list){
+    sbar(COL_SOURCE&&COL_SOURCE.includes('json')?null:COL_SOURCE, null);
+    buildUI(list);
+  });
 }
+
+function loadMoreCols(){
+  var btn=document.getElementById('lm-btn')||document.getElementById('load-more-cols');
+  if(btn){btn.textContent='Loading...';btn.disabled=true;}
+  loadMoreBISCollections(function(){
+    renderCollections();
+  });
+}
+
+
 
 function openCollection(slug,name){
   if(!slug){toast('Collection slug not available');return;}
   setNav(null);sbar(null,null);
   var pg=document.getElementById('pg');pg.className='fade';
   pg.innerHTML=
-    '<div style="max-width:1040px;margin:0 auto;padding:24px 20px">'
+    '<div style="max-width:1060px;margin:0 auto;padding:24px 20px">'
       +'<button class="back-btn" onclick="renderCollections()">'
         +'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Collections'
       +'</button>'
-      +'<div class="hero-title" style="margin-bottom:5px">'+name+'</div>'
-      +'<div class="hero-sub" style="margin-bottom:18px">Fetching via BestInSlot &middot; slug: '+slug+'</div>'
+      +'<div style="font-size:19px;font-weight:800;color:#f7931a;margin-bottom:5px">'+name+'</div>'
+      +'<div style="font-size:11px;color:#304055;margin-bottom:18px">Fetching via BestInSlot &middot; slug: '+slug+'</div>'
       +'<div class="grid" id="col-grid">'+skCards(12)+'</div>'
     +'</div>';
   fetchCollection(slug).then(function(res){
@@ -1112,10 +1356,7 @@ function openCollection(slug,name){
     var cg=document.getElementById('col-grid');
     if(cg)cg.innerHTML=res.r.length
       ?res.r.map(function(item,i){return cardHTML(item,'openAux('+i+')',i*0.022);}).join('')
-      :'<div style="grid-column:1/-1;text-align:center;color:#304055;padding:48px;font-size:14px">'
-        +'No inscriptions returned.<br><br>'
-        +'<a href="https://ordinalswallet.com/collection/'+slug+'" target="_blank" style="color:#f7931a">View on Ordinals Wallet &#8599;</a>'
-      +'</div>';
+      :'<div class="no-results">No inscriptions returned.<br><br><a href="https://ordinalswallet.com/collection/'+slug+'" target="_blank">View on Ordinals Wallet &#8599;</a></div>';
   });
 }
 
@@ -1124,54 +1365,33 @@ function renderRunes(){
   setNav('runes');sbar(null,null);
   var pg=document.getElementById('pg');pg.className='fade';
   pg.innerHTML=
-    '<div style="max-width:1040px;margin:0 auto;padding:24px 20px">'
-      +'<div class="hero-title" style="margin-bottom:5px">Runes</div>'
-      +'<div class="hero-sub" style="margin-bottom:22px">Bitcoin fungible tokens via the Runes protocol &middot; Launched at Halving #4 (Block 840,000)</div>'
+    '<div style="max-width:1060px;margin:0 auto;padding:24px 20px">'
+      +'<div style="font-size:19px;font-weight:800;color:#f7931a;letter-spacing:-.3px;margin-bottom:5px">Runes</div>'
+      +'<div style="font-size:11px;color:#304055;margin-bottom:22px">Bitcoin fungible tokens &middot; Launched at Halving #4 (Block 840,000)</div>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:13px" id="rune-grid">'
         +Array.from({length:12}).map(function(){return'<div class="sk" style="height:90px;border-radius:10px"></div>';}).join('')
       +'</div>'
     +'</div>';
-  fetchRunes(0).then(function(res){
-    sbar(res.src,null);
-    var rg=document.getElementById('rune-grid');
-    if(!rg)return;
-    if(!res.data){
-      rg.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#304055;padding:48px;font-size:14px">'
-        +'Runes data unavailable via proxy.<br><br>'
-        +'<a href="'+ORD+'/runes" target="_blank" style="color:#f7931a">View Runes on ordinals.com &#8599;</a>'
-      +'</div>';
-      return;
-    }
-    var entries=res.data.entries||[];
-    if(!entries.length){
-      rg.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#304055;padding:48px;font-size:14px">'
-        +'No runes data returned.<br><br>'
-        +'<a href="'+ORD+'/runes" target="_blank" style="color:#f7931a">View on ordinals.com &#8599;</a>'
-      +'</div>';
-      return;
-    }
+  apiFetch(PROXY+'/runes').then(function(d){
+    sbar('ordinals.com',null);
+    var rg=document.getElementById('rune-grid');if(!rg)return;
+    var entries=d.entries||[];
+    if(!entries.length){rg.innerHTML='<div class="no-results">No runes data via proxy.<br><br><a href="'+ORD+'/runes" target="_blank">View on ordinals.com &#8599;</a></div>';return;}
     rg.innerHTML=entries.map(function(e,i){
-      var rune=e[0]||'';var info=e[1]||{};
-      var sym=info.symbol||'\u29bf';
-      var supply=info.supply||'0';
-      return '<div class="rune-card fade" style="animation-delay:'+(i*0.04)+'s" onclick="openRune(\''+rune+'\')">'
-        +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">'
+      var rune=e[0]||'';var info=e[1]||{};var sym=info.symbol||'\u29bf';
+      return'<div class="surface" style="padding:14px 16px;cursor:pointer;transition:border-color .14s" onmouseover="this.style.borderColor=\'rgba(247,147,26,.35)\'" onmouseout="this.style.borderColor=\'#141f2e\'" onclick="window.open(\''+ORD+'/rune/'+encodeURIComponent(rune)+'\',\'_blank\')" style="animation:fadeUp .28s ease '+(i*.04)+'s both">'
+        +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
           +'<div style="width:38px;height:38px;border-radius:8px;background:rgba(247,147,26,.1);border:1px solid rgba(247,147,26,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">'+sym+'</div>'
-          +'<div style="flex:1;min-width:0">'
-            +'<div style="font-size:13px;font-weight:700;color:#d8e0ea;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+rune+'</div>'
-            +'<div style="font-size:10px;color:#304055;margin-top:2px">Supply: '+fn(parseInt(supply))+'</div>'
-          +'</div>'
+          +'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:#d8e0ea;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+rune+'</div>'
+          +'<div style="font-size:10px;color:#304055;margin-top:2px">Supply: '+fn(parseInt(info.supply||0))+'</div></div>'
         +'</div>'
-        +'<div style="display:flex;gap:7px">'
-          +'<a href="'+ORD+'/rune/'+encodeURIComponent(rune)+'" target="_blank" class="mlink" onclick="event.stopPropagation()">View &#8599;</a>'
-        +'</div>'
+        +'<a href="'+ORD+'/rune/'+encodeURIComponent(rune)+'" target="_blank" class="mlink" onclick="event.stopPropagation()">View on ordinals.com &#8599;</a>'
       +'</div>';
     }).join('');
+  }).catch(function(){
+    var rg=document.getElementById('rune-grid');
+    if(rg)rg.innerHTML='<div class="no-results">Runes data unavailable via proxy.<br><br><a href="'+ORD+'/runes" target="_blank">View on ordinals.com &#8599;</a></div>';
   });
-}
-
-function openRune(name){
-  window.open(ORD+'/rune/'+encodeURIComponent(name),'_blank');
 }
 
 // ── BLOCKS ────────────────────────────────────────────────────────────────────
@@ -1180,404 +1400,13 @@ function renderBlocks(){
   var pg=document.getElementById('pg');pg.className='fade';
   pg.innerHTML=
     '<div style="max-width:820px;margin:0 auto;padding:24px 20px">'
-      +'<div class="hero-title" style="margin-bottom:5px">Block Explorer</div>'
-      +'<div class="hero-sub" style="margin-bottom:20px">Explore inscriptions by Bitcoin block height &middot; Current tip ~Block 949,146</div>'
+      +'<div style="font-size:19px;font-weight:800;color:#f7931a;letter-spacing:-.3px;margin-bottom:5px">Block Explorer</div>'
+      +'<div style="font-size:11px;color:#304055;margin-bottom:20px">Explore inscriptions by Bitcoin block height &middot; Current tip ~Block 949,146</div>'
       +'<div style="display:flex;gap:9px;margin-bottom:20px">'
-        +'<input id="blk-in" placeholder="Enter block height (e.g. 949146)" '
-          +'style="flex:1;background:#0d1520;border:1px solid #141f2e;border-radius:8px;'
-          +'padding:10px 14px;color:#d8e0ea;font-size:13px;outline:none;'
-          +'font-family:inherit;transition:border-color .14s" '
-          +'onfocus="this.style.borderColor=\'rgba(247,147,26,.4)\'" '
-          +'onblur="this.style.borderColor=\'#141f2e\'" '
-          +'onkeydown="if(event.key===\'Enter\')lookupBlk()">'
+        +'<input id="blk-in" placeholder="Enter block height (e.g. 949146)" style="flex:1;background:#0d1520;border:1px solid #141f2e;border-radius:8px;padding:10px 14px;color:#d8e0ea;font-size:13px;outline:none;font-family:inherit;transition:border-color .14s" onfocus="this.style.borderColor=\'rgba(247,147,26,.4)\'" onblur="this.style.borderColor=\'#141f2e\'" onkeydown="if(event.key===\'Enter\')lookupBlk()">'
         +'<button onclick="lookupBlk()" class="btn-primary">Go</button>'
       +'</div>'
       +'<div class="section-label">Notable Blocks</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">'
-        +[
-          {b:949146,l:'Today'},
-          {b:840000,l:'Halving #4'},
-          {b:826000,l:'Runes Alpha'},
-          {b:767430,l:'1st Inscription'},
-          {b:820000,l:'10M Inscriptions'},
-          {b:888888,l:'Block 888,888'},
-          {b:778921,l:'1st Recursive'},
-          {b:809478,l:'BRC-20 Launch'},
-        ].map(function(bb){
-          return '<button onclick="lookupBlkNum('+bb.b+')" class="btn-ghost" style="flex-direction:column;align-items:center;gap:1px">'
-            +'<span style="font-weight:800;color:#d8e0ea">'+fn(bb.b)+'</span>'
-            +'<span style="font-size:9px;color:#304055">'+bb.l+'</span>'
-          +'</button>';
-        }).join('')
-      +'</div>'
-      +'<div id="blk-res"></div>'
-    +'</div>';
-
-  // Also load latest block list
-  fetchBlocks().then(function(res){
-    sbar(res.src,null);
-    if(res.data){ST.blockHeight=res.data.last||ST.blockHeight;}
-  });
-}
-
-function lookupBlk(){
-  var v=document.getElementById('blk-in');
-  if(v&&v.value.trim()&&!isNaN(v.value.trim()))lookupBlkNum(parseInt(v.value.trim()));
-}
-function lookupBlkNum(h){
-  var br=document.getElementById('blk-res');if(!br)return;
-  br.innerHTML='<div style="text-align:center;color:#304055;padding:24px;font-size:24px"><span class="spin">&circledot;</span></div>';
-  fetchBlock(h).then(function(res){
-    sbar(res.src,null);
-    if(!res.r.length){
-      br.innerHTML='<div style="text-align:center;color:#304055;padding:28px;font-size:13px">'
-        +'No inscriptions found in block '+fn(h)+'<br><br>'
-        +'<a href="'+ORD+'/block/'+h+'" target="_blank" style="color:#f7931a">View block on ordinals.com &#8599;</a>'
-      +'</div>';
-      // Show block data if we have it
-      if(res.blockData){
-        var bd=res.blockData;
-        br.innerHTML+='<div class="surface" style="padding:16px;margin-top:16px">'
-          +'<div class="section-label">Block Info</div>'
-          +[
-            {l:'Block Height',v:fn(h)},
-            {l:'Block Hash',v:'<span style="font-size:10px;word-break:break-all">'+(bd.hash||'&mdash;')+'</span>'},
-            {l:'Transactions',v:fn(bd.transactions?bd.transactions.length:null)},
-            {l:'Runes Introduced',v:fn(bd.runes?bd.runes.length:0)},
-          ].map(function(r){
-            return '<div class="meta-row"><span class="meta-label">'+r.l+'</span><span class="meta-val">'+r.v+'</span></div>';
-          }).join('')
-        +'</div>';
-      }
-      return;
-    }
-    ST.aux=res.r;
-    br.innerHTML='<div class="section-label">'+fn(res.r.length)+' Inscriptions in Block '+fn(h)+' &middot; via '+(res.src||'API')+'</div>'
-      +'<div class="grid">'+res.r.map(function(item,i){return cardHTML(item,'openAux('+i+')',i*0.025);}).join('')+'</div>';
-  });
-}
-
-// ── STATS ─────────────────────────────────────────────────────────────────────
-function renderStats(){
-  setNav('stats');sbar(null,null);
-  var pg=document.getElementById('pg');pg.className='fade';
-  pg.innerHTML=
-    '<div style="max-width:820px;margin:0 auto;padding:24px 20px">'
-      +'<div class="hero-title" style="margin-bottom:5px">Stats &amp; Architecture</div>'
-      +'<div class="hero-sub" style="margin-bottom:22px">How Bitcoin Ordinals data flows to this explorer</div>'
-      +'<div id="sc" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px">'
-        +Array.from({length:6}).map(function(){return'<div class="sk" style="height:80px;border-radius:11px"></div>';}).join('')
-      +'</div>'
-      // Proxy status
-      +'<div class="surface" style="padding:18px;margin-bottom:14px">'
-        +'<div class="section-label">Proxy Status</div>'
-        +'<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'
-          +'<div id="proxy-status" style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:#5a7090">'
-            +'<span class="spin" style="font-size:16px">&circledot;</span> Testing proxy connection&hellip;'
-          +'</div>'
-          +'<a href="proxy-worker.js" download class="btn-ghost" style="font-size:11px">Download proxy-worker.js &#8595;</a>'
-        +'</div>'
-        +'<div style="font-size:11px;color:#304055;margin-top:10px;line-height:1.6">'
-          +'The proxy is a Cloudflare Worker that forwards requests to ordinals.com with '
-          +'<code style="background:#0a1018;padding:1px 5px;border-radius:3px;color:#f7931a">Accept: application/json</code>. '
-          +'Deploy <code style="background:#0a1018;padding:1px 5px;border-radius:3px;color:#f7931a">proxy-worker.js</code> to Cloudflare Workers, '
-          +'then update the <code style="background:#0a1018;padding:1px 5px;border-radius:3px;color:#f7931a">PROXY</code> constant at the top of this file.'
-        +'</div>'
-      +'</div>'
-      // Data pipeline
-      +'<div class="surface" style="padding:20px;margin-bottom:14px">'
-        +'<div class="section-label">Data Pipeline</div>'
-        +[
-          {n:'Bitcoin Blockchain', c:'#f7931a', d:'Inscriptions are stored in Bitcoin transaction witness data (tapscript). Permanent, immutable, on-chain forever.'},
-          {n:'ord Node (Rust)',    c:'#f7931a', d:'Casey Rodarmor\'s official indexer. Scans every block, extracts inscriptions, builds a local database. ordinals.com runs this.'},
-          {n:'ordinals.com JSON API', c:'#3b82f6', d:'With Accept:application/json header, the ord server returns structured JSON for /inscription/{id}, /inscriptions/{page}, /address/{addr}, /block/{h}, /sat/{n}, /runes and more.'},
-          {n:'Cloudflare Worker (Proxy)', c:'#10b981', d:'Our proxy adds the correct header and CORS headers, enabling the browser to fetch live data directly from ordinals.com.'},
-          {n:'BestInSlot (Fallback)', c:'#10b981', d:'api.bestinslot.xyz/v3 — third-party indexer with rich metadata. Used when the proxy is unavailable.'},
-          {n:'Ordiscan (Fallback)', c:'#64748b', d:'api.ordiscan.com/v1 — second fallback. Provides inscriptions, runes, rare sat data.'},
-          {n:'Seed Data (Last Resort)', c:'#475569', d:'24 real inscription IDs scraped from ordinals.com on May 13, 2026. Previews still render via ordinals.com iframes.'},
-        ].map(function(s,i){
-          return '<div class="pipe-step">'
-            +'<div class="pipe-num" style="background:'+s.c+'22;border:1px solid '+s.c+'55;color:'+s.c+'">'+(i+1)+'</div>'
-            +'<div><div style="font-size:12px;font-weight:700;color:#d8e0ea;margin-bottom:3px">'+s.n+'</div>'
-            +'<div style="font-size:11px;color:#304055;line-height:1.5">'+s.d+'</div></div>'
-          +'</div>';
-        }).join('')
-      +'</div>'
-      // API status
-      +'<div class="surface" style="padding:20px">'
-        +'<div class="section-label">API Status</div>'
-        +[
-          {n:'ordinals.com',          dot:'#f7931a', s:'Partial',   note:'preview + content always free &middot; JSON API via proxy'},
-          {n:'Cloudflare Proxy',      dot:'#10b981', s:'Deploy',    note:'proxy-worker.js &middot; unlocks full ordinals.com JSON API'},
-          {n:'BestInSlot',            dot:'#10b981', s:'Live',      note:'api.bestinslot.xyz/v3 &middot; primary metadata fallback'},
-          {n:'Ordiscan',              dot:'#10b981', s:'Live',      note:'api.ordiscan.com/v1 &middot; secondary fallback'},
-          {n:'Wallet Native APIs',    dot:'#10b981', s:'Live',      note:'Xverse / UniSat / OKX &middot; active when wallet connected'},
-          {n:'Hiro Ordinals API',     dot:'#ef4444', s:'Dead',      note:'Shut down permanently March 9, 2026'},
-        ].map(function(a){
-          return '<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #0e1a28;font-size:11px">'
-            +'<div style="width:8px;height:8px;border-radius:50%;background:'+a.dot+';flex-shrink:0"></div>'
-            +'<div style="font-weight:700;color:#d8e0ea;width:150px;flex-shrink:0">'+a.n+'</div>'
-            +'<div style="color:#5a7090;width:70px;flex-shrink:0;font-size:10px">'+a.s+'</div>'
-            +'<div style="color:#304055;font-size:10px">'+a.note+'</div>'
-          +'</div>';
-        }).join('')
-      +'</div>'
-    +'</div>';
-
-  // Load live stats
-  apiFetch(PROXY+'/blockheight').then(function(h){
-    ST.blockHeight=typeof h==='number'?h:ST.blockHeight;
-    return apiFetch('https://api.bestinslot.xyz/v3/inscription/all?offset=0&count=1&sort_by=inscr_num&order=desc');
-  }).then(function(d){
-    var top=nBIS((d.data||[])[0]);
-    var sc=document.getElementById('sc');
-    if(sc)sc.innerHTML=[
-      {v:top?fn(top.number):'126M+',    l:'Total Inscriptions'},
-      {v:'Block '+fn(ST.blockHeight),   l:'Latest Block'},
-      {v:top?ago(top.genesis_timestamp):'&mdash;',l:'Last Inscription'},
-      {v:'3 Active',                    l:'API Providers'},
-      {v:'3 Wallets',                   l:'Xverse &middot; UniSat &middot; OKX'},
-      {v:'Mar 9, 2026',                 l:'Hiro Shutdown'},
-    ].map(function(c){
-      return '<div class="stat-card"><div class="stat-val">'+c.v+'</div><div class="stat-label">'+c.l+'</div></div>';
-    }).join('');
-  }).catch(function(){
-    var sc=document.getElementById('sc');
-    if(sc)sc.innerHTML='<div style="grid-column:1/-1;text-align:center;color:#304055;padding:20px;font-size:12px">Live stats unavailable &mdash; BestInSlot may be rate-limiting.</div>';
-  });
-
-  // Test proxy
-  apiFetch(PROXY+'/blockheight').then(function(){
-    var ps=document.getElementById('proxy-status');
-    if(ps)ps.innerHTML='<span style="color:#10b981;font-size:14px">&#10003;</span> <span style="color:#10b981">Proxy connected &mdash; ordinals.com JSON API active</span>';
-  }).catch(function(){
-    var ps=document.getElementById('proxy-status');
-    if(ps)ps.innerHTML='<span style="color:#f59e0b;font-size:14px">&#9888;</span> <span style="color:#f59e0b">Proxy not reachable &mdash; deploy proxy-worker.js to Cloudflare Workers, then update PROXY constant</span>';
-  });
-}
-
-// ── SAT EXPLORER ──────────────────────────────────────────────────────────────
-function openSat(sat){
-  setNav(null);sbar(null,null);
-  var pg=document.getElementById('pg');pg.className='fade';
-  pg.innerHTML=
-    '<div class="detail-wrap">'
-      +'<button class="back-btn" onclick="renderHome()">'
-        +'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Back'
-      +'</button>'
-      +'<div class="hero-title" style="margin-bottom:5px">Satoshi #'+fn(parseInt(sat))+'</div>'
-      +'<div class="hero-sub" style="margin-bottom:20px">Sat explorer &middot; via ordinals.com</div>'
-      +'<div class="surface" id="sat-box" style="padding:0">'
-        +'<div style="padding:20px;border-bottom:1px solid #0e1a28"><div class="section-label" style="margin:0">Loading&hellip;</div></div>'
-      +'</div>'
-    +'</div>';
-  fetchSat(sat).then(function(res){
-    sbar(res.src,null);
-    var sb=document.getElementById('sat-box');
-    if(!res.data||!sb)return;
-    var d=res.data;
-    var rows=[
-      {l:'Sat Number',   v:fn(d.number||sat)},
-      {l:'Decimal',      v:d.decimal||'&mdash;'},
-      {l:'Degree',       v:d.degree||'&mdash;'},
-      {l:'Name',         v:d.name||'&mdash;'},
-      {l:'Height',       v:fn(d.height)},
-      {l:'Cycle',        v:fn(d.cycle)},
-      {l:'Epoch',        v:fn(d.epoch)},
-      {l:'Period',       v:fn(d.period)},
-      {l:'Offset',       v:fn(d.offset)},
-      {l:'Rarity',       v:d.rarity||'common', rclr:rc(d.rarity)},
-      {l:'Timestamp',    v:d.timestamp?new Date(d.timestamp*1000).toUTCString():'&mdash;'},
-      {l:'Inscriptions', v:fn(d.inscriptions?d.inscriptions.length:0)},
-    ];
-    sb.innerHTML='<div style="padding:10px 16px;border-bottom:1px solid #0e1a28"><div class="section-label" style="margin:0">Sat Details &middot; via '+res.src+'</div></div>'
-      +rows.map(function(r){
-        return '<div class="meta-row"><span class="meta-label">'+r.l+'</span><span class="meta-val" style="'+(r.rclr?'color:'+r.rclr+';':'')+'">'+r.v+'</span></div>';
-      }).join('');
-    if(d.inscriptions&&d.inscriptions.length){
-      ST.aux=d.inscriptions.map(function(id){
-        return{id:id,number:0,content_type:'',content_length:0,genesis_block_height:0,
-          genesis_timestamp:null,sat_rarity:d.rarity||'common',sat_name:d.name||'',
-          address:'',value:0,collection_name:'',collection_slug:'',title:'',
-          parent:'',children:[],preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,genesis_tx:''};
-      });
-      sb.innerHTML+='<div style="padding:12px 16px;border-top:1px solid #0e1a28"><div class="section-label">Inscriptions on this Sat</div>'
-        +'<div class="grid" style="padding:0">'+ST.aux.map(function(item,i){return cardHTML(item,'openAux('+i+')',i*0.05);}).join('')+'</div>'
-      +'</div>';
-    }
-  });
-}
-
-// ── WALLET ────────────────────────────────────────────────────────────────────
-function openWallet(){
-  var modal=document.getElementById('modal');
-  modal.style.display='flex';
-  modal.innerHTML=
-    '<div class="modal-box" style="width:370px">'
-      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">'
-        +'<div>'
-          +'<div style="font-size:17px;font-weight:800;color:#d8e0ea">Connect Wallet</div>'
-          +'<div style="font-size:11px;color:#304055;margin-top:3px">View your Bitcoin inscriptions</div>'
-        +'</div>'
-        +'<button onclick="closeModal()" style="background:none;border:none;color:#5a7090;font-size:22px;cursor:pointer;line-height:1;padding:0">&times;</button>'
-      +'</div>'
-      +[
-        {emoji:'\ud83d\udd35', l:'Xverse',     s:'Recommended \u00b7 SatsConnect', fn:'cXverse()'},
-        {emoji:'\u26a1',       l:'UniSat',     s:'Popular \u00b7 Bitcoin native',   fn:'cUnisat()'},
-        {emoji:'\u25a0',       l:'OKX Wallet', s:'Web3 \u00b7 Multi-chain',         fn:'cOKX()'},
-      ].map(function(w){
-        return '<button class="wbtn" onclick="'+w.fn+'">'
-          +'<div style="width:38px;height:38px;border-radius:10px;background:#050810;'
-            +'display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0">'+w.emoji+'</div>'
-          +'<div style="flex:1;text-align:left">'
-            +'<div style="font-weight:700;color:#d8e0ea">'+w.l+'</div>'
-            +'<div style="font-size:10px;color:#304055;margin-top:2px">'+w.s+'</div>'
-          +'</div>'
-          +'<span style="color:#304055">&rarr;</span>'
-        +'</button>';
-      }).join('')
-      +'<div style="font-size:10px;color:#304055;text-align:center;margin-top:8px">'
-        +'Non-custodial &middot; your keys never leave your wallet'
-      +'</div>'
-    +'</div>';
-}
-
-function closeModal(){
-  var m=document.getElementById('modal');
-  if(m){m.style.display='none';m.innerHTML='';}
-}
-
-// No raw unicode in function names — using ASCII equivalents per skill rules
-function cXverse(){
-  toast('Connecting Xverse\u2026');closeModal();
-  setTimeout(function(){
-    try{
-      var sc=window.SatsConnect;
-      if(sc&&sc.getAddress){
-        sc.getAddress({
-          payload:{purposes:['ordinals','payment'],message:'Connect to ord.xyz',network:{type:'Mainnet'}},
-          onFinish:function(r){
-            var addrs=(r&&r.addresses)||[];
-            var a=null;
-            for(var i=0;i<addrs.length;i++){if(addrs[i].purpose==='ordinals'){a=addrs[i];break;}}
-            if(!a&&addrs.length)a=addrs[0];
-            if(a&&a.address)setWallet('xverse',a.address);
-            else toast('Xverse: no address returned');
-          },
-          onCancel:function(){toast('Xverse: cancelled');}
-        });
-        return;
-      }
-      if(window.XverseProviders&&window.XverseProviders.BitcoinProvider){
-        window.XverseProviders.BitcoinProvider.request('wallet_connect',null)
-          .then(function(res){
-            var a=res&&res.result&&res.result.addresses&&res.result.addresses[0];
-            if(a)setWallet('xverse',a.address);else toast('Xverse: no address');
-          }).catch(function(e){toast('Xverse: '+(e.message||'failed'));});
-        return;
-      }
-      toast('Xverse not installed');
-      setTimeout(function(){window.open('https://www.xverse.app/download','_blank');},600);
-    }catch(e){toast('Xverse: '+e.message);}
-  },200);
-}
-
-function cUnisat(){
-  toast('Connecting UniSat\u2026');closeModal();
-  setTimeout(function(){
-    if(!window.unisat){
-      toast('UniSat not installed');
-      setTimeout(function(){window.open('https://unisat.io/download','_blank');},600);
-      return;
-    }
-    window.unisat.requestAccounts()
-      .then(function(a){if(a&&a[0])setWallet('unisat',a[0]);else toast('UniSat: no accounts');})
-      .catch(function(e){toast('UniSat: '+(e.message||'failed'));});
-  },200);
-}
-
-function cOKX(){
-  toast('Connecting OKX\u2026');closeModal();
-  setTimeout(function(){
-    var okx=window.okxwallet&&window.okxwallet.bitcoin;
-    if(!okx){
-      toast('OKX not installed');
-      setTimeout(function(){window.open('https://www.okx.com/web3','_blank');},600);
-      return;
-    }
-    okx.requestAccounts()
-      .then(function(a){if(a&&a[0])setWallet('okx',a[0]);else toast('OKX: no accounts');})
-      .catch(function(e){toast('OKX: '+(e.message||'failed'));});
-  },200);
-}
-
-function setWallet(type,address){
-  ST.wallet={type:type,address:address};
-  var wb=document.getElementById('wb');
-  if(wb){
-    var ico={xverse:'\ud83d\udd35',unisat:'\u26a1',okx:'\u25a0'}[type]||'\ud83d\udcb0';
-    wb.textContent=ico+' '+sa(address);
-    wb.style.background='rgba(247,147,26,.12)';
-    wb.style.border='1px solid rgba(247,147,26,.3)';
-    wb.style.color='#f7931a';
-    wb.style.boxShadow='none';
-    wb.onclick=function(){openAddr(address);};
-  }
-  toast('\u2713 Connected: '+sa(address));
-}
-
-// ── SEARCH ────────────────────────────────────────────────────────────────────
-function doSearch(e){
-  if(e.key!=='Enter')return;
-  var q=(document.getElementById('sq')||{}).value;
-  if(!q)return;
-  q=q.trim();
-
-  // Bitcoin address
-  if(/^(bc1|1|3)/.test(q)&&q.length>20){openAddr(q);return;}
-
-  // Inscription ID (txid + i + index)
-  if(/^[0-9a-fA-F]{64}i\d+$/.test(q)){
-    var pseudo={id:q,number:0,content_type:'',content_length:0,genesis_block_height:0,
-      genesis_timestamp:null,sat_rarity:'common',sat_name:'',address:'',value:546,
-      collection_name:'',collection_slug:'',title:'',parent:'',children:[],
-      preview:ORD+'/preview/'+q,content:ORD+'/content/'+q,genesis_tx:q.replace(/i\d+$/,'')};
-    ST.items=[pseudo];ST.aux=[pseudo];ST.sel=pseudo;
-    renderDetail(pseudo);loadMeta(q);
-    return;
-  }
-
-  // Sat number (very large number)
-  if(/^\d+$/.test(q)&&q.length>10){openSat(q);return;}
-
-  // Block height
-  if(/^\d+$/.test(q)&&parseInt(q)<=ST.blockHeight){
-    go('blocks');
-    setTimeout(function(){
-      var bi=document.getElementById('blk-in');
-      if(bi){bi.value=q;}
-      lookupBlkNum(parseInt(q));
-    },100);
-    return;
-  }
-
-  // Inscription number (short number)
-  if(/^\d+$/.test(q)){
-    toast('Searching inscription #'+fn(parseInt(q))+'\u2026');
-    apiFetch('https://api.bestinslot.xyz/v3/inscription/batch_info',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({queries:[parseInt(q)]})
-    }).then(function(d){
-      var item=nBIS((d.data||[])[0]);
-      if(item){ST.items=[item];ST.sel=item;renderDetail(item);}
-      else toast('Inscription #'+q+' not found');
-    }).catch(function(){toast('Search failed \u2014 try the full inscription ID');});
-  }
-}
-
-// ── INIT ──────────────────────────────────────────────────────────────────────
-renderHome();
-</script>
-</body>
-</html>
+        +[{b:949146,l:'Today'},{b:840000,l:'Halving #4'},{b:826000,l:'Runes Alpha'},{b:767430,l:'1st Inscription'},{b:820000,l:'10M Inscriptions'},{b:888888,l:'Block 888,888'},{b:778921,l:'1st Recursive'},{b:809478,l:'BRC-20 Launch'},{b:767753,l:'First 100'}]
+        .map(function(bb){return'<button onclick="lookupBlkNum('+bb.b+')" class="btn-ghost" style="flex-d
