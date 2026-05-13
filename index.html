@@ -3,203 +3,594 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<meta name="description" content="Bitcoin Ordinals Explorer — Browse inscriptions, collections, blocks, runes and more.">
-<meta name="theme-color" content="#070b10">
-<title>ord.xyz &mdash; Bitcoin Ordinals Explorer</title>
+<title>OrdXYZ - Bitcoin Ordinals Explorer</title>
+<meta name="description" content="The most fun Bitcoin Ordinals Explorer. Browse inscriptions, collections, blocks, runes and more.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+:root{
+  --bg:#0a0612;
+  --bg2:#110d1e;
+  --bg3:#1a1430;
+  --border:#2a1f4a;
+  --border2:#3d2d6b;
+  --accent:#f7931a;
+  --accent2:#ff6bff;
+  --accent3:#00f5ff;
+  --accent4:#39ff14;
+  --text:#f0e8ff;
+  --text2:#9b8ec4;
+  --text3:#5a4a80;
+  --card:#130e22;
+  --card2:#1c1535;
+  --radius:14px;
+  --font-display:'Bangers',cursive;
+  --font-body:'Nunito',sans-serif;
+}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{background:#070b10;color:#d8e0ea;font-family:'Inter',system-ui,-apple-system,sans-serif;min-height:100vh;overflow-x:hidden}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  min-height:100vh;
+  overflow-x:hidden;
+  background-image:
+    radial-gradient(ellipse at 20% 20%, rgba(247,147,26,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 80%, rgba(255,107,255,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(0,245,255,0.03) 0%, transparent 70%);
+}
 a{color:inherit;text-decoration:none}
-button,input,select{font-family:inherit}
+button,input,select{font-family:var(--font-body)}
 iframe{border:none;display:block}
 
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ANIMATIONS */
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes spin{to{transform:rotate(360deg)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-@keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes wiggle{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+@keyframes glow{0%,100%{text-shadow:0 0 10px var(--accent),0 0 20px var(--accent)}50%{text-shadow:0 0 20px var(--accent),0 0 40px var(--accent),0 0 60px var(--accent)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes rainbow{0%{filter:hue-rotate(0deg)}100%{filter:hue-rotate(360deg)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pop{0%{transform:scale(0.8);opacity:0}70%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
 
-.sk{background:linear-gradient(90deg,#0d1520 25%,#1a2535 50%,#0d1520 75%);background-size:200% 100%;animation:shimmer 1.5s ease-in-out infinite;border-radius:6px}
-.fade{animation:fadeUp .28s ease both}
+.fade{animation:fadeUp .3s ease both}
+.sk{
+  background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.5s ease-in-out infinite;
+  border-radius:8px;
+}
 .spin-el{animation:spin .8s linear infinite;display:inline-block}
-
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:#070b10}
-::-webkit-scrollbar-thumb{background:#1a2535;border-radius:3px}
+.float-el{animation:float 3s ease-in-out infinite}
+.glow-el{animation:glow 2s ease-in-out infinite}
 
 /* NAV */
-#nav{position:sticky;top:0;z-index:100;height:54px;padding:0 20px;background:rgba(7,11,16,.97);border-bottom:1px solid #141f2e;display:flex;align-items:center;gap:0;backdrop-filter:blur(12px)}
-#logo{display:flex;align-items:center;gap:9px;cursor:pointer;margin-right:22px;flex-shrink:0}
-#logo-icon{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,#f7931a,#d4750e);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#000;box-shadow:0 2px 12px rgba(247,147,26,.35)}
-#logo-text{font-size:16px;font-weight:800;color:#f7931a;letter-spacing:-.4px}
-#nav-links{display:flex;align-items:center;gap:1px;flex:1;overflow-x:auto}
+#nav{
+  position:sticky;top:0;z-index:100;
+  height:58px;padding:0 20px;
+  background:rgba(10,6,18,0.95);
+  border-bottom:2px solid var(--border2);
+  display:flex;align-items:center;gap:0;
+  backdrop-filter:blur(16px);
+  box-shadow:0 2px 30px rgba(247,147,26,0.1);
+}
+#logo{
+  display:flex;align-items:center;gap:10px;
+  cursor:pointer;margin-right:20px;flex-shrink:0;
+}
+#logo-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,#f7931a,#ff6bff);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:900;color:#000;
+  box-shadow:0 0 16px rgba(247,147,26,0.5);
+  animation:float 3s ease-in-out infinite;
+}
+#logo-text{
+  font-family:var(--font-display);
+  font-size:26px;color:var(--accent);
+  letter-spacing:1px;
+  text-shadow:0 0 12px rgba(247,147,26,0.4);
+  line-height:1;
+}
+#logo-sub{
+  font-size:9px;font-weight:800;color:var(--accent2);
+  letter-spacing:2px;text-transform:uppercase;
+  text-shadow:0 0 8px rgba(255,107,255,0.5);
+  margin-top:-2px;
+}
+#nav-links{display:flex;align-items:center;gap:2px;flex:1;overflow-x:auto}
 #nav-links::-webkit-scrollbar{height:0}
-.nl{padding:5px 11px;border-radius:7px;font-size:12px;font-weight:600;border:none;cursor:pointer;background:transparent;color:#5a7090;transition:all .14s;white-space:nowrap;flex-shrink:0}
-.nl:hover,.nl.on{color:#f7931a;background:rgba(247,147,26,.1)}
+.nl{
+  padding:5px 12px;border-radius:8px;
+  font-size:13px;font-weight:800;
+  border:none;cursor:pointer;
+  background:transparent;color:var(--text2);
+  transition:all .15s;white-space:nowrap;flex-shrink:0;
+  letter-spacing:.3px;
+}
+.nl:hover,.nl.on{
+  color:var(--accent);
+  background:rgba(247,147,26,0.12);
+  text-shadow:0 0 8px rgba(247,147,26,0.4);
+}
 #nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
-#nav-search{display:flex;align-items:center;background:#0d1520;border:1px solid #141f2e;border-radius:8px;padding:0 11px;height:34px;width:240px;gap:7px;transition:border-color .14s}
-#nav-search:focus-within{border-color:rgba(247,147,26,.4)}
-#sq{background:none;border:none;color:#d8e0ea;font-size:12px;flex:1;outline:none;width:100%}
-#sq::placeholder{color:#3a5068}
-#wb{padding:7px 15px;border-radius:8px;background:linear-gradient(135deg,#f7931a,#d4750e);border:none;color:#000;font-size:12px;font-weight:800;cursor:pointer;white-space:nowrap;transition:opacity .14s;box-shadow:0 2px 12px rgba(247,147,26,.3)}
-#wb:hover{opacity:.88}
+#nav-search{
+  display:flex;align-items:center;
+  background:var(--bg2);
+  border:1.5px solid var(--border);
+  border-radius:10px;padding:0 12px;
+  height:36px;width:230px;gap:8px;
+  transition:border-color .15s;
+}
+#nav-search:focus-within{border-color:var(--accent2)}
+#sq{
+  background:none;border:none;
+  color:var(--text);font-size:12px;
+  flex:1;outline:none;font-weight:600;
+}
+#sq::placeholder{color:var(--text3)}
+#wb{
+  padding:7px 16px;border-radius:10px;
+  background:linear-gradient(135deg,var(--accent),#ff6bff);
+  border:none;color:#000;font-size:12px;font-weight:900;
+  cursor:pointer;white-space:nowrap;
+  transition:transform .15s,box-shadow .15s;
+  box-shadow:0 0 16px rgba(247,147,26,0.4);
+  letter-spacing:.5px;
+}
+#wb:hover{transform:scale(1.05);box-shadow:0 0 24px rgba(247,147,26,0.6)}
 
-/* STATUS */
-#sbar{display:none;padding:5px 20px;font-size:11px;font-weight:600;letter-spacing:.2px}
-.live-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:4px;animation:pulse 2s ease-in-out infinite}
+/* STATUS BAR */
+#sbar{display:none;padding:5px 20px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.live-dot{
+  width:7px;height:7px;border-radius:50%;
+  display:inline-block;margin-right:5px;
+  animation:pulse 2s ease-in-out infinite;
+}
 
-/* FILTER BAR */
-#filter-wrap{background:rgba(7,11,16,.97);border-bottom:1px solid #141f2e;position:sticky;top:54px;z-index:90;backdrop-filter:blur(12px)}
-.fbar-row{padding:7px 20px;display:flex;gap:5px;overflow-x:auto;align-items:center}
+/* FILTER WRAP */
+#filter-wrap{
+  background:rgba(10,6,18,0.95);
+  border-bottom:2px solid var(--border);
+  position:sticky;top:58px;z-index:90;
+  backdrop-filter:blur(12px);
+}
+.fbar-row{
+  padding:8px 20px;
+  display:flex;gap:5px;overflow-x:auto;
+  align-items:center;
+}
 .fbar-row::-webkit-scrollbar{height:0}
-.tab{padding:4px 12px;border-radius:18px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid #141f2e;background:rgba(255,255,255,.02);color:#5a7090;white-space:nowrap;transition:all .13s;font-family:inherit}
-.tab.on{border-color:#f7931a;background:rgba(247,147,26,.13);color:#f7931a}
-.tab:hover:not(.on){border-color:rgba(247,147,26,.25);color:#b07830}
-.tab-special{border-color:rgba(167,139,250,.3);color:#a78bfa;background:rgba(167,139,250,.07)}
-.tab-special:hover{border-color:rgba(167,139,250,.5)}
-.tab-special.on{border-color:#a78bfa;background:rgba(167,139,250,.18);color:#a78bfa}
-.tab-bitmap{border-color:rgba(251,191,36,.3);color:#fbbf24;background:rgba(251,191,36,.07)}
-.tab-bitmap.on{border-color:#fbbf24;background:rgba(251,191,36,.18);color:#fbbf24}
-.tab-game{border-color:rgba(34,197,94,.3);color:#22c55e;background:rgba(34,197,94,.07)}
-.tab-game.on{border-color:#22c55e;background:rgba(34,197,94,.18);color:#22c55e}
-.fdivider{width:1px;height:18px;background:#141f2e;flex-shrink:0;margin:0 3px}
 
-/* SORT / FILTER ROW */
-.sort-row{padding:5px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-bottom:1px solid #0e1a28}
-.sort-label{font-size:10px;font-weight:700;color:#304055;letter-spacing:.5px;flex-shrink:0}
-.sort-btn{padding:3px 9px;border-radius:5px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:transparent;color:#304055;transition:all .13s;font-family:inherit}
-.sort-btn.on{background:#f7931a;color:#000}
-.sort-btn:hover:not(.on){color:#f7931a}
-.range-input{background:#0d1520;border:1px solid #141f2e;border-radius:6px;padding:3px 9px;color:#d8e0ea;font-size:10px;width:90px;outline:none;height:26px;transition:border-color .14s}
-.range-input:focus{border-color:rgba(247,147,26,.4)}
-.go-btn{padding:3px 9px;border-radius:5px;font-size:10px;font-weight:700;border:none;cursor:pointer;background:rgba(247,147,26,.15);color:#f7931a;font-family:inherit;transition:all .13s}
-.go-btn:hover{background:rgba(247,147,26,.25)}
+/* TABS */
+.tab{
+  padding:5px 13px;border-radius:20px;
+  font-size:11px;font-weight:800;
+  cursor:pointer;border:1.5px solid var(--border);
+  background:rgba(255,255,255,0.02);
+  color:var(--text2);white-space:nowrap;
+  transition:all .15s;font-family:var(--font-body);
+  letter-spacing:.3px;
+}
+.tab.on{
+  border-color:var(--accent);
+  background:rgba(247,147,26,0.15);
+  color:var(--accent);
+  box-shadow:0 0 10px rgba(247,147,26,0.2);
+}
+.tab:hover:not(.on){border-color:var(--border2);color:var(--text)}
+.tab-gif.on{border-color:var(--accent2);background:rgba(255,107,255,0.12);color:var(--accent2);box-shadow:0 0 10px rgba(255,107,255,0.2)}
+.tab-html.on{border-color:var(--accent3);background:rgba(0,245,255,0.1);color:var(--accent3);box-shadow:0 0 10px rgba(0,245,255,0.2)}
+.tab-game.on{border-color:var(--accent4);background:rgba(57,255,20,0.1);color:var(--accent4);box-shadow:0 0 10px rgba(57,255,20,0.2)}
+.tab-bitmap.on{border-color:#fbbf24;background:rgba(251,191,36,0.12);color:#fbbf24;box-shadow:0 0 10px rgba(251,191,36,0.2)}
+.tab-parent.on{border-color:#a78bfa;background:rgba(167,139,250,0.12);color:#a78bfa}
+
+/* SORT ROW */
+.sort-row{
+  padding:5px 20px;
+  display:flex;align-items:center;gap:6px;
+  flex-wrap:wrap;
+  border-bottom:1px solid var(--border);
+}
+.sort-label{
+  font-size:9px;font-weight:900;
+  color:var(--text3);letter-spacing:1px;
+  flex-shrink:0;text-transform:uppercase;
+}
+.sort-btn{
+  padding:3px 10px;border-radius:6px;
+  font-size:10px;font-weight:800;
+  border:none;cursor:pointer;
+  background:transparent;color:var(--text3);
+  transition:all .13s;font-family:var(--font-body);
+  letter-spacing:.3px;
+}
+.sort-btn.on{background:var(--accent);color:#000;box-shadow:0 0 8px rgba(247,147,26,0.4)}
+.sort-btn:hover:not(.on){color:var(--accent)}
+.fdivider{width:1px;height:16px;background:var(--border);flex-shrink:0;margin:0 2px}
+.range-in{
+  background:var(--bg2);border:1.5px solid var(--border);
+  border-radius:6px;padding:3px 9px;
+  color:var(--text);font-size:10px;
+  width:88px;outline:none;height:26px;
+  font-family:var(--font-body);font-weight:700;
+  transition:border-color .14s;
+}
+.range-in:focus{border-color:var(--accent2)}
+.go-btn{
+  padding:3px 10px;border-radius:6px;
+  font-size:10px;font-weight:800;
+  border:none;cursor:pointer;
+  background:rgba(247,147,26,0.15);
+  color:var(--accent);font-family:var(--font-body);
+  transition:all .13s;
+}
+.go-btn:hover{background:rgba(247,147,26,0.25)}
 
 /* SOURCE ROW */
-.src-row{padding:4px 20px;font-size:11px;color:#304055;border-bottom:1px solid #0e1a28;display:flex;align-items:center;gap:6px}
+.src-row{
+  padding:4px 20px;font-size:11px;
+  color:var(--text3);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:6px;
+  font-weight:700;
+}
 
 /* GRID */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:13px;padding:16px 20px}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(182px,1fr));
+  gap:14px;padding:18px 20px;
+}
 
 /* CARD */
-.card{background:#0d1520;border:1px solid #141f2e;border-radius:12px;overflow:hidden;cursor:pointer;transition:transform .16s,border-color .18s,box-shadow .18s}
-.card:hover{transform:translateY(-3px);border-color:rgba(247,147,26,.4);box-shadow:0 10px 32px rgba(247,147,26,.08)}
-.card-media{position:relative;aspect-ratio:1;background:#050810;overflow:hidden}
+.card{
+  background:var(--card);
+  border:1.5px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;cursor:pointer;
+  transition:transform .18s,border-color .18s,box-shadow .18s;
+}
+.card:hover{
+  transform:translateY(-4px) rotate(-0.5deg);
+  border-color:var(--accent);
+  box-shadow:0 12px 36px rgba(247,147,26,0.15),0 0 0 1px rgba(247,147,26,0.1);
+}
+.card-media{
+  position:relative;aspect-ratio:1;
+  background:var(--bg);overflow:hidden;
+}
 .card-media iframe{width:100%;height:100%;pointer-events:none}
 .card-body{padding:9px 11px 11px}
-.card-num{font-size:12px;font-weight:700;color:#d8e0ea;margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.card-meta{display:flex;justify-content:space-between;font-size:10px;color:#304055}
-.badge{position:absolute;top:7px;left:7px;color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:3px;letter-spacing:.5px;pointer-events:none}
-.rbadge{position:absolute;top:7px;right:7px;font-size:9px;font-weight:800;padding:2px 6px;border-radius:3px;pointer-events:none}
-.colbadge{position:absolute;bottom:0;left:0;right:0;padding:5px 8px;background:linear-gradient(transparent,rgba(5,8,16,.95));font-size:10px;font-weight:700;color:#f7931a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none}
-.bitmap-badge{position:absolute;bottom:7px;right:7px;background:rgba(251,191,36,.2);color:#fbbf24;font-size:9px;font-weight:800;padding:2px 6px;border-radius:3px;pointer-events:none}
+.card-num{
+  font-size:12px;font-weight:800;
+  color:var(--text);margin-bottom:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.card-meta{
+  display:flex;justify-content:space-between;
+  font-size:10px;color:var(--text3);font-weight:700;
+}
 
-/* SURFACES */
-.surface{background:#0d1520;border:1px solid #141f2e;border-radius:12px}
-.section-label{font-size:9px;font-weight:700;color:#304055;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
-.meta-row{display:flex;justify-content:space-between;align-items:center;padding:8px 16px;font-size:12px;border-bottom:1px solid #0e1a28}
-.meta-row:last-child{border-bottom:none}
-.meta-label{color:#5a7090;font-weight:500;flex-shrink:0;margin-right:12px}
-.meta-val{color:#d8e0ea;font-weight:600;text-align:right;word-break:break-all;max-width:65%}
-.stat-card{background:#0d1520;border:1px solid #141f2e;border-radius:10px;padding:14px 16px;text-align:center}
-.stat-val{font-size:20px;font-weight:800;color:#f7931a;margin-bottom:3px}
-.stat-label{font-size:9px;font-weight:700;color:#304055;letter-spacing:.6px}
+/* BADGES */
+.badge{
+  position:absolute;top:7px;left:7px;
+  color:#000;font-size:9px;font-weight:900;
+  padding:2px 7px;border-radius:20px;
+  letter-spacing:.5px;pointer-events:none;
+  font-family:var(--font-body);
+  box-shadow:0 2px 8px rgba(0,0,0,0.4);
+}
+.rbadge{
+  position:absolute;top:7px;right:7px;
+  font-size:9px;font-weight:900;
+  padding:2px 7px;border-radius:20px;
+  pointer-events:none;
+  box-shadow:0 2px 8px rgba(0,0,0,0.4);
+}
+.colbadge{
+  position:absolute;bottom:0;left:0;right:0;
+  padding:6px 9px;
+  background:linear-gradient(transparent,rgba(10,6,18,0.97));
+  font-size:10px;font-weight:800;color:var(--accent);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  pointer-events:none;letter-spacing:.3px;
+}
 
 /* BUTTONS */
-.btn-primary{padding:7px 16px;border-radius:8px;font-size:12px;font-weight:700;background:linear-gradient(135deg,#f7931a,#d4750e);border:none;color:#000;cursor:pointer;transition:opacity .14s;font-family:inherit}
-.btn-primary:hover{opacity:.88}
-.btn-ghost{padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(255,255,255,.03);border:1px solid #1a2535;color:#5a7090;cursor:pointer;transition:all .14s;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
-.btn-ghost:hover{border-color:rgba(247,147,26,.35);color:#f7931a}
-.btn-orange{padding:6px 13px;border-radius:7px;font-size:11px;font-weight:700;background:rgba(247,147,26,.1);border:1px solid rgba(247,147,26,.3);color:#f7931a;cursor:pointer;transition:all .14s;font-family:inherit;text-decoration:none;display:inline-block}
-.btn-orange:hover{background:rgba(247,147,26,.18)}
-.load-more{padding:10px 28px;background:transparent;border:1px solid #1a2535;border-radius:8px;color:#5a7090;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
-.load-more:hover{border-color:rgba(247,147,26,.4);color:#f7931a}
-.mlink{padding:5px 11px;border-radius:6px;font-size:11px;font-weight:600;background:rgba(255,255,255,.02);border:1px solid #141f2e;color:#5a7090;text-decoration:none;transition:all .13s;display:inline-block}
-.mlink:hover{color:#f7931a;border-color:rgba(247,147,26,.3)}
-.wbtn{display:flex;align-items:center;gap:12px;width:100%;padding:13px 15px;margin-bottom:8px;background:rgba(255,255,255,.02);border:1px solid #141f2e;border-radius:10px;cursor:pointer;color:#d8e0ea;font-size:14px;font-weight:600;transition:all .14s;text-align:left;font-family:inherit}
-.wbtn:hover{border-color:rgba(247,147,26,.35);background:rgba(247,147,26,.04)}
+.btn-primary{
+  padding:9px 20px;border-radius:10px;
+  font-size:13px;font-weight:800;
+  background:linear-gradient(135deg,var(--accent),#ff6bff);
+  border:none;color:#000;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  font-family:var(--font-body);letter-spacing:.5px;
+  box-shadow:0 0 16px rgba(247,147,26,0.3);
+}
+.btn-primary:hover{transform:scale(1.05);box-shadow:0 0 24px rgba(247,147,26,0.5)}
+.btn-ghost{
+  padding:7px 14px;border-radius:10px;
+  font-size:12px;font-weight:800;
+  background:rgba(255,255,255,0.04);
+  border:1.5px solid var(--border2);
+  color:var(--text2);cursor:pointer;
+  transition:all .15s;font-family:var(--font-body);
+  text-decoration:none;
+  display:inline-flex;align-items:center;gap:5px;
+}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent);background:rgba(247,147,26,0.08)}
+.btn-orange{
+  padding:6px 14px;border-radius:8px;
+  font-size:11px;font-weight:800;
+  background:rgba(247,147,26,0.12);
+  border:1.5px solid rgba(247,147,26,0.35);
+  color:var(--accent);cursor:pointer;
+  transition:all .15s;font-family:var(--font-body);
+  text-decoration:none;display:inline-block;
+}
+.btn-orange:hover{background:rgba(247,147,26,0.22);box-shadow:0 0 12px rgba(247,147,26,0.3)}
+.load-more{
+  padding:11px 30px;
+  background:var(--bg2);
+  border:1.5px solid var(--border2);
+  border-radius:12px;
+  color:var(--text2);
+  font-size:13px;font-weight:800;
+  cursor:pointer;transition:all .15s;
+  font-family:var(--font-body);letter-spacing:.3px;
+}
+.load-more:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 16px rgba(247,147,26,0.2)}
+.mlink{
+  padding:5px 12px;border-radius:8px;
+  font-size:11px;font-weight:800;
+  background:rgba(255,255,255,0.03);
+  border:1.5px solid var(--border);
+  color:var(--text2);text-decoration:none;
+  transition:all .15s;display:inline-block;
+}
+.mlink:hover{color:var(--accent);border-color:rgba(247,147,26,0.4);background:rgba(247,147,26,0.06)}
+.wbtn{
+  display:flex;align-items:center;gap:13px;
+  width:100%;padding:14px 16px;margin-bottom:9px;
+  background:rgba(255,255,255,0.03);
+  border:1.5px solid var(--border);
+  border-radius:12px;cursor:pointer;
+  color:var(--text);font-size:14px;font-weight:800;
+  transition:all .15s;text-align:left;
+  font-family:var(--font-body);
+}
+.wbtn:hover{border-color:var(--accent);background:rgba(247,147,26,0.06);transform:translateX(3px)}
+
+/* SURFACE */
+.surface{background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius)}
+.surface2{background:var(--card2);border:1.5px solid var(--border2);border-radius:var(--radius)}
+.section-label{
+  font-size:9px;font-weight:900;
+  color:var(--text3);letter-spacing:1.5px;
+  text-transform:uppercase;margin-bottom:10px;
+}
+
+/* META TABLE */
+.meta-row{
+  display:flex;justify-content:space-between;
+  align-items:center;padding:9px 16px;
+  font-size:12px;border-bottom:1px solid var(--border);
+}
+.meta-row:last-child{border-bottom:none}
+.meta-label{color:var(--text2);font-weight:700;flex-shrink:0;margin-right:12px}
+.meta-val{color:var(--text);font-weight:800;text-align:right;word-break:break-all;max-width:65%}
+
+/* STAT CARD */
+.stat-card{
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:12px;padding:14px 16px;text-align:center;
+}
+.stat-val{font-size:20px;font-weight:900;color:var(--accent);margin-bottom:3px}
+.stat-label{font-size:9px;font-weight:900;color:var(--text3);letter-spacing:.8px}
 
 /* DETAIL */
 .detail-wrap{max-width:1060px;margin:0 auto;padding:24px 20px}
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
-.back-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:none;color:#5a7090;font-size:12px;font-weight:600;cursor:pointer;margin-bottom:22px;padding:0;font-family:inherit;transition:color .13s}
-.back-btn:hover{color:#f7931a}
-.pipe-step{display:flex;gap:13px;padding:10px 0;border-bottom:1px solid #0e1a28}
-.pipe-step:last-child{border-bottom:none}
-.pipe-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.back-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:none;border:none;color:var(--text2);
+  font-size:12px;font-weight:800;cursor:pointer;
+  margin-bottom:22px;padding:0;font-family:var(--font-body);
+  transition:color .13s;letter-spacing:.3px;
+}
+.back-btn:hover{color:var(--accent)}
 
 /* MODAL */
-#modal{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(6px);animation:fadeIn .18s ease}
-.modal-box{background:#0d1520;border:1px solid #1a2535;border-radius:16px;padding:24px;max-width:92vw;animation:slideDown .2s ease;max-height:90vh;overflow-y:auto}
+#modal{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.85);
+  display:flex;align-items:center;justify-content:center;
+  z-index:200;backdrop-filter:blur(8px);
+  animation:fadeIn .18s ease;
+}
+.modal-box{
+  background:var(--card2);
+  border:1.5px solid var(--border2);
+  border-radius:18px;padding:26px;
+  max-width:92vw;
+  animation:pop .25s ease;
+  max-height:90vh;overflow-y:auto;
+}
 
 /* TOAST */
 #tst{position:fixed;bottom:22px;right:22px;z-index:500;pointer-events:none}
-.toast-msg{background:#0d1520;border:1px solid #f7931a;border-radius:9px;padding:11px 16px;color:#f7931a;font-size:12px;font-weight:600;pointer-events:auto;animation:fadeUp .2s ease;max-width:320px;box-shadow:0 4px 24px rgba(247,147,26,.15)}
+.toast-msg{
+  background:var(--card2);
+  border:1.5px solid var(--accent);
+  border-radius:12px;padding:12px 18px;
+  color:var(--accent);font-size:12px;font-weight:800;
+  pointer-events:auto;animation:pop .2s ease;
+  max-width:320px;
+  box-shadow:0 4px 24px rgba(247,147,26,0.2),0 0 0 1px rgba(247,147,26,0.1);
+  letter-spacing:.3px;
+}
 
-/* CONTENT TYPE ICONS */
-.ct-video{background:#ef4444}
-.ct-image{background:#3b82f6}
-.ct-gif{background:#f59e0b}
-.ct-text{background:#64748b}
-.ct-audio{background:#8b5cf6}
-.ct-svg{background:#ec4899}
-.ct-html{background:#10b981}
-.ct-js{background:#f59e0b}
-.ct-3d{background:#06b6d4}
-.ct-md{background:#84cc16}
-.ct-bitmap{background:#fbbf24}
-.ct-game{background:#22c55e}
-.ct-parent{background:#a78bfa}
-.ct-file{background:#475569}
+/* HERO SECTION */
+.hero-strip{
+  padding:20px 20px 14px;
+  border-bottom:2px solid var(--border);
+  display:flex;align-items:flex-start;
+  justify-content:space-between;flex-wrap:wrap;gap:12px;
+  background:linear-gradient(135deg,rgba(247,147,26,0.04) 0%,rgba(255,107,255,0.04) 100%);
+}
+.hero-title{
+  font-family:var(--font-display);
+  font-size:32px;color:var(--accent);
+  letter-spacing:1px;line-height:1;
+  text-shadow:0 0 20px rgba(247,147,26,0.4);
+}
+.hero-sub{font-size:11px;color:var(--text3);margin-top:5px;line-height:1.6;font-weight:700}
 
-/* BITMAP SPECIAL */
-.bitmap-preview{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;background:linear-gradient(135deg,#0a0f18,#111824)}
-.bitmap-num{font-size:22px;font-weight:900;color:#fbbf24;letter-spacing:-.5px}
-.bitmap-label{font-size:10px;font-weight:700;color:#92681a;letter-spacing:1px}
+/* TRENDING */
+.trend-btn{
+  padding:4px 10px;border-radius:6px;
+  font-size:10px;font-weight:900;
+  border:none;cursor:pointer;
+  background:transparent;color:var(--text3);
+  transition:all .13s;font-family:var(--font-body);
+  letter-spacing:.5px;
+}
+.trend-btn.on{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#000;box-shadow:0 0 10px rgba(247,147,26,0.4);
+}
 
-/* GAME SPECIAL */
-.game-preview{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;background:linear-gradient(135deg,#051208,#0a1f12)}
-.game-icon{font-size:36px}
-.game-label{font-size:9px;font-weight:700;color:#16a34a;letter-spacing:1px}
+/* COLLECTION CARD */
+.col-card{
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;cursor:pointer;
+  transition:transform .18s,border-color .18s,box-shadow .18s;
+}
+.col-card:hover{
+  transform:translateY(-5px) rotate(0.5deg);
+  border-color:var(--accent2);
+  box-shadow:0 14px 40px rgba(255,107,255,0.15);
+}
+
+/* RUNE CARD */
+.rune-card{
+  background:var(--card);border:1.5px solid var(--border);
+  border-radius:12px;padding:15px 16px;
+  cursor:pointer;transition:all .16s;
+}
+.rune-card:hover{border-color:var(--accent3);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,245,255,0.1)}
+
+/* PIPE STEP */
+.pipe-step{display:flex;gap:14px;padding:11px 0;border-bottom:1px solid var(--border)}
+.pipe-step:last-child{border-bottom:none}
+.pipe-num{
+  width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:900;flex-shrink:0;
+  font-family:var(--font-display);letter-spacing:.5px;
+}
 
 /* NO RESULTS */
-.no-results{grid-column:1/-1;text-align:center;color:#304055;padding:60px 20px;font-size:14px}
-.no-results a{color:#f7931a}
+.no-results{
+  grid-column:1/-1;text-align:center;
+  color:var(--text3);padding:60px 20px;font-size:14px;font-weight:700;
+}
+.no-results a{color:var(--accent)}
+
+/* BITMAP PREVIEW */
+.bitmap-preview{
+  width:100%;height:100%;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:6px;
+  background:linear-gradient(135deg,#0a0612,#1a0d00);
+}
+.bitmap-num{
+  font-family:var(--font-display);
+  font-size:28px;color:#fbbf24;
+  text-shadow:0 0 20px rgba(251,191,36,0.6);
+}
+.bitmap-lbl{font-size:9px;font-weight:900;color:#92681a;letter-spacing:2px}
+
+/* EMOJI DECORATIONS */
+.deco{
+  position:fixed;pointer-events:none;
+  font-size:24px;opacity:0.06;z-index:0;
+  animation:float 6s ease-in-out infinite;
+}
 
 /* RESPONSIVE */
-@media(max-width:750px){.detail-grid{grid-template-columns:1fr}.stats-4{grid-template-columns:repeat(2,1fr)!important}#nav-links .nl:nth-child(n+5){display:none}#nav-search{width:160px}}
-@media(max-width:500px){#logo-text{display:none}#nav-search{display:none}}
+@media(max-width:750px){
+  .detail-grid{grid-template-columns:1fr}
+  .stats-4{grid-template-columns:repeat(2,1fr)!important}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;padding:12px}
+  #logo-text{font-size:20px}
+  #nav-links .nl:nth-child(n+5){display:none}
+  #nav-search{width:160px}
+}
+@media(max-width:500px){
+  #logo-sub{display:none}
+  #nav-search{display:none}
+  .hero-title{font-size:24px}
+}
 </style>
 </head>
 <body>
 
+<!-- Decorative floating emojis -->
+<div class="deco" style="top:10%;left:5%;animation-delay:0s">&#8383;</div>
+<div class="deco" style="top:30%;right:3%;animation-delay:1s;font-size:18px">&#128142;</div>
+<div class="deco" style="top:60%;left:2%;animation-delay:2s;font-size:20px">&#9889;</div>
+<div class="deco" style="top:80%;right:5%;animation-delay:.5s">&#127881;</div>
+<div class="deco" style="top:50%;left:50%;animation-delay:1.5s;font-size:16px">&#128640;</div>
+
+<!-- NAV -->
 <nav id="nav">
   <div id="logo" onclick="go('home')">
     <div id="logo-icon">&#8383;</div>
-    <span id="logo-text">ord.xyz</span>
+    <div>
+      <div id="logo-text">OrdXYZ</div>
+      <div id="logo-sub">Bitcoin Inscriptions</div>
+    </div>
   </div>
   <div id="nav-links">
-    <button class="nl on" id="n-home"        onclick="go('home')">Inscriptions</button>
-    <button class="nl"    id="n-collections" onclick="go('collections')">Collections</button>
-    <button class="nl"    id="n-runes"       onclick="go('runes')">Runes</button>
-    <button class="nl"    id="n-blocks"      onclick="go('blocks')">Blocks</button>
-    <button class="nl"    id="n-sats"        onclick="go('sats')">Sats</button>
-    <button class="nl"    id="n-stats"       onclick="go('stats')">Stats</button>
+    <button class="nl on" id="n-home" onclick="go('home')">&#128248; Feed</button>
+    <button class="nl" id="n-collections" onclick="go('collections')">&#127912; Collections</button>
+    <button class="nl" id="n-runes" onclick="go('runes')">&#128081; Runes</button>
+    <button class="nl" id="n-blocks" onclick="go('blocks')">&#129667; Blocks</button>
+    <button class="nl" id="n-sats" onclick="go('sats')">&#10024; Sats</button>
+    <button class="nl" id="n-stats" onclick="go('stats')">&#128202; Stats</button>
   </div>
   <div id="nav-right">
     <div id="nav-search">
-      <svg width="13" height="13" fill="none" stroke="#3a5068" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input id="sq" onkeydown="doSearch(event)" placeholder="# &middot; ID &middot; address &middot; sat &middot; block...">
+      <svg width="13" height="13" fill="none" stroke="#5a4a80" stroke-width="2.2" viewBox="0 0 24 24">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input id="sq" onkeydown="doSearch(event)" placeholder="# ID address sat block...">
     </div>
-    <button id="wb" onclick="openWallet()">Connect Wallet</button>
+    <button id="wb" onclick="openWallet()">&#128081; Connect</button>
   </div>
 </nav>
 
+<!-- STATUS BAR -->
 <div id="sbar"></div>
+
+<!-- PAGE -->
 <div id="pg"></div>
+
+<!-- MODAL -->
 <div id="modal" style="display:none" onclick="if(event.target===this)closeModal()"></div>
+
+<!-- TOAST -->
 <div id="tst"></div>
 
 <script>
@@ -211,44 +602,33 @@ var ORD     = 'https://ordinals.com';
 var BIS     = 'https://api.bestinslot.xyz/v3';
 var ORDSCAN = 'https://api.ordiscan.com/v1';
 
-// ── CONTENT TYPE DEFINITIONS ─────────────────────────────────────────────────
-// Matches ord.io's content-type URL params exactly
+// ── CONTENT TYPES (matching ord.io exactly) ──────────────────────────────────
 var CONTENT_TYPES = [
-  {id:'all',        label:'All',        mime:null,                   cls:'',          icon:'?',   urlParam:'all'},
-  {id:'image',      label:'Images',     mime:'image/png,image/jpeg,image/webp,image/avif', cls:'ct-image',  icon:'IMG', urlParam:'image'},
-  {id:'gif',        label:'GIFs',       mime:'image/gif',            cls:'ct-gif',    icon:'GIF', urlParam:'gif'},
-  {id:'text',       label:'Text',       mime:'text/plain',           cls:'ct-text',   icon:'TXT', urlParam:'text'},
-  {id:'video',      label:'Videos',     mime:'video/mp4,video/webm', cls:'ct-video',  icon:'VID', urlParam:'video'},
-  {id:'parent',     label:'Parents',    mime:null,                   cls:'ct-parent', icon:'PAR', urlParam:'parent'},
-  {id:'game',       label:'Games',      mime:'text/html',            cls:'ct-game',   icon:'GAME',urlParam:'game'},
-  {id:'audio',      label:'Audio',      mime:'audio/mpeg,audio/wav,audio/ogg,audio/flac', cls:'ct-audio', icon:'AUD', urlParam:'audio'},
-  {id:'3d',         label:'3D',         mime:'model/gltf-binary,model/gltf+json',     cls:'ct-3d',     icon:'3D',  urlParam:'3d'},
-  {id:'svg',        label:'SVGs',       mime:'image/svg+xml',        cls:'ct-svg',    icon:'SVG', urlParam:'svg'},
-  {id:'html',       label:'HTML',       mime:'text/html',            cls:'ct-html',   icon:'HTML',urlParam:'html'},
-  {id:'javascript', label:'JavaScript', mime:'application/javascript,text/javascript',cls:'ct-js','icon':'JS', urlParam:'javascript'},
-  {id:'markdown',   label:'Markdown',   mime:'text/markdown',        cls:'ct-md',     icon:'MD',  urlParam:'markdown'},
-  {id:'bitmap',     label:'Bitmap',     mime:null,                   cls:'ct-bitmap', icon:'BMP', urlParam:'bitmap'},
+  {id:'all',        label:'&#127760; All',      mime:null,                       emoji:'&#127760;'},
+  {id:'image',      label:'&#128247; Images',   mime:'image/png,image/jpeg,image/webp,image/avif', emoji:'&#128247;'},
+  {id:'gif',        label:'&#127910; GIFs',     mime:'image/gif',                emoji:'&#127910;'},
+  {id:'text',       label:'&#128196; Text',     mime:'text/plain',               emoji:'&#128196;'},
+  {id:'video',      label:'&#127916; Videos',   mime:'video/mp4,video/webm',     emoji:'&#127916;'},
+  {id:'parent',     label:'&#128106; Parents',  mime:null,                       emoji:'&#128106;'},
+  {id:'game',       label:'&#127918; Games',    mime:'text/html',                emoji:'&#127918;'},
+  {id:'audio',      label:'&#127925; Audio',    mime:'audio/mpeg,audio/wav,audio/ogg,audio/flac', emoji:'&#127925;'},
+  {id:'3d',         label:'&#128161; 3D',       mime:'model/gltf-binary,model/gltf+json', emoji:'&#128161;'},
+  {id:'svg',        label:'&#127912; SVGs',     mime:'image/svg+xml',            emoji:'&#127912;'},
+  {id:'html',       label:'&#127760; HTML',     mime:'text/html',                emoji:'&#9881;'},
+  {id:'javascript', label:'&#10024; JS',        mime:'application/javascript',   emoji:'&#10024;'},
+  {id:'markdown',   label:'&#128221; Markdown', mime:'text/markdown',            emoji:'&#128221;'},
+  {id:'bitmap',     label:'&#129667; Bitmap',   mime:null,                       emoji:'&#129667;'},
 ];
 
-// Trending / sort options matching ord.io exactly
 var TRENDING = [
-  {id:'1h',   label:'1H'},
-  {id:'1d',   label:'1D'},
-  {id:'1w',   label:'1W'},
-  {id:'1m',   label:'1M'},
-  {id:'all',  label:'All'},
+  {id:'1h',label:'1H'},{id:'1d',label:'1D'},{id:'1w',label:'1W'},{id:'1m',label:'1M'},{id:'all',label:'All'},
 ];
-
-// Sort / order options
 var SORT_OPTS = [
-  {id:'newest',  label:'Newest'},
-  {id:'oldest',  label:'Oldest'},
-  {id:'highest', label:'Highest #'},
-  {id:'lowest',  label:'Lowest #'},
-  {id:'rare',    label:'Rare Sats'},
+  {id:'newest',label:'Newest'},{id:'oldest',label:'Oldest'},
+  {id:'highest',label:'Highest #'},{id:'lowest',label:'Lowest #'},{id:'rare',label:'Rare Sats'},
 ];
 
-// ── SEED IDs (real from ordinals.com block 949,146) ──────────────────────────
+// ── SEED IDs from ordinals.com block 949,146 ─────────────────────────────────
 var SEEDS = [
   '8c798a6dd99a6dae3c5d013aba245c9a5cb637b118344f0d7583d74c9aa8d61ai0',
   '9efeea87f1cac2496738b8702567563b34911d1659d6c6ba70b3de95ec2f6d0di0',
@@ -276,189 +656,23 @@ var SEEDS = [
   '20fa9d317af18cc976a6b77797ceb5884127ac5dd7e3f131565a18dd712311c6i0',
 ];
 
-// Notable bitmap examples (format: number.bitmap)
-var BITMAPS = [
-  {num:'0',label:'Genesis Bitmap'},
-  {num:'1',label:'Block 1 Bitmap'},
-  {num:'9',label:'Block 9 Bitmap'},
-  {num:'21',label:'Block 21 Bitmap'},
-  {num:'210',label:'Block 210 Bitmap'},
-  {num:'420',label:'Block 420 Bitmap'},
-  {num:'777',label:'Lucky 777'},
-  {num:'888',label:'Lucky 888'},
-  {num:'1000',label:'Block 1,000'},
-  {num:'6930',label:'First Halving'},
-  {num:'9999',label:'Block 9,999'},
-  {num:'21000',label:'Block 21,000'},
-];
-
-// Collections — sourced from github.com/ordinals-wallet/ordinals-collections
-// 34 major collections across 6 categories
-var COLLECTIONS = [
-
-  // ── OG HISTORIC (first 1000 inscriptions era) ─────────────────────────────
-  {slug:'ordinal-punks',name:'Ordinal Punks',supply:100,
-   desc:'100 hand-made punks in the first 650 inscriptions ever. Rarest PFP on Bitcoin.',
-   accent:'#f59e0b',cat:'OG',twitter:'ordinalpunks',ins_from:407},
-
-  {slug:'bitcoin-shrooms',name:'Bitcoin Shrooms',supply:224,
-   desc:'Among the earliest inscriptions ever. Sold at Sotheby's. Ultra-rare artifacts.',
-   accent:'#84cc16',cat:'OG',twitter:'btcshrooms',ins_from:130},
-
-  {slug:'taproot-wizards',name:'Taproot Wizards',supply:2106,
-   desc:'By Udi Wertheimer & Eric Wall. Largest single inscription ever (4MB block).',
-   accent:'#8b5cf6',cat:'OG',twitter:'TaprootWizards',ins_from:652},
-
-  {slug:'bitcoin-rocks',name:'Bitcoin Rocks',supply:100,
-   desc:'Inspired by EtherRocks. One of the very first collections on Bitcoin Ordinals.',
-   accent:'#78716c',cat:'OG',twitter:'BitcoinRocks_',ins_from:2099},
-
-  {slug:'timechain-collectibles',name:'Timechain Collectibles',supply:21,
-   desc:'Only 21 ever — mirroring Bitcoin's max supply. Among the rarest Ordinals.',
-   accent:'#f7931a',cat:'OG',twitter:'TimechainCollect',ins_from:421},
-
-  {slug:'sub10k',name:'Sub10K',supply:9999,
-   desc:'All inscriptions under #10,000. One of the most historic sets on Bitcoin.',
-   accent:'#f7931a',cat:'OG',twitter:'sub10k_btc',ins_from:1},
-
-  // ── BLUE CHIP 10K ──────────────────────────────────────────────────────────
-  {slug:'bitcoin-punks',name:'Bitcoin Punks',supply:10000,
-   desc:'First 10k PFP on Bitcoin. Inspired by CryptoPunks. Inscriptions #89–#34,399.',
-   accent:'#f59e0b',cat:'Blue Chip',twitter:'Bitcoin_Punks_',ins_from:89},
-
-  {slug:'nodemonkes',name:'NodeMonkes',supply:10000,
-   desc:'First original 10k PFP on Bitcoin. BAYC co-founder Gordon Goner is a holder.',
-   accent:'#10b981',cat:'Blue Chip',twitter:'nodemonkes',ins_from:83522},
-
-  {slug:'bitcoin-frogs',name:'Bitcoin Frogs',supply:10000,
-   desc:'First 10k to sell out via free mint on Lightning. Strong cross-chain community.',
-   accent:'#22c55e',cat:'Blue Chip',twitter:'BitcoinFrogs_',ins_from:381224},
-
-  {slug:'ordinal-maxi-biz',name:'Ordinal Maxi Biz',supply:21000,
-   desc:'OMB — 21,000 supply mirroring BTC. Pioneer of the OG Ordinals community.',
-   accent:'#3b82f6',cat:'Blue Chip',twitter:'ordinalmaxibiz',ins_from:32},
-
-  {slug:'quantum-cats',name:'Quantum Cats',supply:3333,
-   desc:'By Taproot Wizards. Schrödinger-themed recursive inscriptions. Cultural milestone.',
-   accent:'#a78bfa',cat:'Blue Chip',twitter:'QuantumCatsXYZ',ins_from:1048568},
-
-  {slug:'bitcoin-puppets',name:'Bitcoin Puppets',supply:10000,
-   desc:'Top volume Ordinals collection. Creepy puppet PFPs. Most traded in 2024.',
-   accent:'#ef4444',cat:'Blue Chip',twitter:'BTCPuppets',ins_from:1078973},
-
-  {slug:'pizza-ninjas',name:'Pizza Ninjas',supply:10000,
-   desc:'Inscribed exclusively on pizza sats — the rarest satoshi type.',
-   accent:'#f97316',cat:'Blue Chip',twitter:'PizzaNinjas_',ins_from:281650},
-
-  {slug:'ocm-genesis',name:'OCM Genesis',supply:10000,
-   desc:'OnChainMonkey migrated from Ethereum. First collection in a single transaction.',
-   accent:'#06b6d4',cat:'Blue Chip',twitter:'OnChainMonkey',ins_from:1136232},
-
-  {slug:'bitcoin-badgers',name:'Bitcoin Badgers',supply:10000,
-   desc:'Badger PFPs on Bitcoin. Strong community with consistent trading volume.',
-   accent:'#64748b',cat:'Blue Chip',twitter:'BitcoinBadgers_',ins_from:450000},
-
-  {slug:'onchainducks',name:'OnChain Ducks',supply:10000,
-   desc:'10k pixel ducks inscribed fully on-chain. Strong and active community.',
-   accent:'#facc15',cat:'Blue Chip',twitter:'OnChainDucks',ins_from:165000},
-
-  {slug:'chainers',name:'Chainers',supply:10000,
-   desc:'Fully on-chain generative PFPs with a rare trait system.',
-   accent:'#a78bfa',cat:'Blue Chip',twitter:'ChainersNFT',ins_from:900000},
-
-  // ── AIRDROPS & MAJOR EVENTS ────────────────────────────────────────────────
-  {slug:'runestone',name:'Runestone',supply:112383,
-   desc:'Largest airdrop in Ordinals history. The artefact that launched the Runes protocol.',
-   accent:'#f7931a',cat:'Airdrop',twitter:'_Runestone',ins_from:72929185},
-
-  {slug:'rsic-metaprotocol',name:'RSIC Metaprotocol',supply:21000,
-   desc:'Airdropped to 9,000+ wallets. Mines RSIC runes per Bitcoin block.',
-   accent:'#10b981',cat:'Airdrop',twitter:'RSICprotocol',ins_from:64000000},
-
-  {slug:'natcats',name:'Natcats',supply:10000,
-   desc:'Naturally inscribed cats found on Bitcoin. All traits are naturally occurring on-chain.',
-   accent:'#f472b6',cat:'Airdrop',twitter:'NatcatsBitcoin',ins_from:0},
-
-  {slug:'ordinal-maxi-biz-green',name:'OMB Green Eyes',supply:11111,
-   desc:'OMB derivative — burned punks to create this unique collection. OG community.',
-   accent:'#22c55e',cat:'Airdrop',twitter:'ordinalmaxibiz',ins_from:700000},
-
-  // ── RECURSIVE & TECHNICAL ──────────────────────────────────────────────────
-  {slug:'recursive-punks',name:'Recursive Punks',supply:10000,
-   desc:'First 10,000 recursive collection. Regenerated using pre-inscribed traits as SVG.',
-   accent:'#a78bfa',cat:'Recursive',twitter:'RecursivePunks',ins_from:777000},
-
-  {slug:'bitcoin-apes',name:'Bitcoin Apes',supply:10000,
-   desc:'Ape PFPs fully inscribed on Bitcoin. OG wave of 10k recursive collections.',
-   accent:'#78350f',cat:'Recursive',twitter:'BitcoinApes_',ins_from:500000},
-
-  {slug:'hashlings',name:'Hashlings',supply:10000,
-   desc:'Utility Ordinals. Holders get discounted Bitcoin mining rig access.',
-   accent:'#f7931a',cat:'Recursive',twitter:'HashlingsNFT',ins_from:1200000},
-
-  // ── ART & 1-OF-1s ─────────────────────────────────────────────────────────
-  {slug:'bitcoin-face',name:'Bitcoin Faces',supply:1000,
-   desc:'Generative face art. Early and highly regarded Ordinals art collection.',
-   accent:'#f59e0b',cat:'Art',twitter:'BitcoinFaces_',ins_from:43000},
-
-  {slug:'ordinal-birds',name:'Ordinal Birds',supply:2121,
-   desc:'Hand-drawn birds inscribed on Bitcoin. Beloved early art collection.',
-   accent:'#22c55e',cat:'Art',twitter:'OrdinalBirds',ins_from:390000},
-
-  {slug:'bitcoin-wizards',name:'Bitcoin Wizards',supply:1024,
-   desc:'1024 wizard PFPs from the early Bitcoin Ordinals art scene.',
-   accent:'#8b5cf6',cat:'Art',twitter:'BTCWizards_',ins_from:100000},
-
-  {slug:'planet-ordinals',name:'Planet Ordinals',supply:888,
-   desc:'Unique planet illustrations. Early Ordinals art project with 888 supply.',
-   accent:'#3b82f6',cat:'Art',twitter:'PlanetOrdinals',ins_from:52000},
-
-  {slug:'inscribed-pepes',name:'Inscribed Pepes',supply:4444,
-   desc:'Pepe the Frog meme culture immortalized on Bitcoin. Meme meets blockchain.',
-   accent:'#84cc16',cat:'Art',twitter:'InscribedPepes',ins_from:200000},
-
-  {slug:'bitcoin-toads',name:'Bitcoin Toads',supply:6969,
-   desc:'Toad PFPs on Bitcoin. Community project steeped in Ordinals culture.',
-   accent:'#10b981',cat:'Art',twitter:'BitcoinToads_',ins_from:600000},
-
-  // ── MIGRATED FROM OTHER CHAINS ─────────────────────────────────────────────
-  {slug:'degods-btc',name:'DeGods (BTC)',supply:535,
-   desc:'Migrated from Solana. Compressed 210x210px and inscribed in block 776,408.',
-   accent:'#f8fafc',cat:'Migrated',twitter:'DeGodsNFT',ins_from:776000},
-
-  {slug:'bitcoin-frogs-2',name:'Bitcoin Frogs Gen2',supply:2000,
-   desc:'Second generation Bitcoin Frogs. Community expansion collection.',
-   accent:'#22c55e',cat:'Migrated',twitter:'BitcoinFrogs_',ins_from:5000000},
-
-  // ── UTILITY & NAMES ────────────────────────────────────────────────────────
-  {slug:'sats-names',name:'Sats Names (.sats)',supply:0,
-   desc:'Bitcoin naming system — register .sats domains as Ordinals. Decentralized identity.',
-   accent:'#f59e0b',cat:'Utility',twitter:'SatsNames',ins_from:400000},
-
-  {slug:'bitmap',name:'Bitmap',supply:0,
-   desc:'Claim Bitcoin blocks as digital real estate. number.bitmap inscription standard.',
-   accent:'#fbbf24',cat:'Utility',twitter:'bitmapBTC',ins_from:0},
-];
-
 // ── STATE ────────────────────────────────────────────────────────────────────
 var ST = {
-  page:'home',
-  contentType:'all',    // current content type tab
-  trending:'1d',        // trending window
-  sort:'newest',        // sort order
-  rangeFrom:'',         // inscription range filter from
-  rangeTo:'',           // inscription range filter to
-  satribute:'',         // satribute filter
-  items:[], off:0, hasMore:true, loading:false, src:null,
-  wallet:null, sel:null, aux:[], blockH:949146,
+  page:'home',contentType:'all',trending:'1d',sort:'newest',
+  rangeFrom:'',rangeTo:'',satribute:'',
+  items:[],off:0,hasMore:true,loading:false,src:null,
+  wallet:null,sel:null,aux:[],blockH:949146,
+  // Collections
+  COL_CACHE:[],COL_LOADED:false,COL_OFFSET:0,COL_HAS_MORE:true,
+  COL_LOADING:false,COL_SOURCE:null,
 };
 
 // ── UTILS ────────────────────────────────────────────────────────────────────
-var fn  = function(n){return n!=null?Number(n).toLocaleString():'&mdash;'};
-var fb  = function(n){if(!n)return'&mdash;';if(n<1024)return n+' B';if(n<1048576)return(n/1024).toFixed(1)+' KB';return(n/1048576).toFixed(2)+' MB'};
-var sa  = function(a){return a?a.slice(0,8)+'\u2026'+a.slice(-5):'&mdash;'};
-var si  = function(a){return a?a.slice(0,12)+'\u2026'+a.slice(-4):'&mdash;'};
-var ago = function(ts){
+function fn(n){return n!=null?Number(n).toLocaleString():'&mdash;'}
+function fb(n){if(!n)return'&mdash;';if(n<1024)return n+' B';if(n<1048576)return(n/1024).toFixed(1)+' KB';return(n/1048576).toFixed(2)+' MB'}
+function sa(a){return a?a.slice(0,8)+'\u2026'+a.slice(-5):'&mdash;'}
+function si(a){return a?a.slice(0,12)+'\u2026'+a.slice(-4):'&mdash;'}
+function ago(ts){
   if(!ts)return'&mdash;';
   var d=new Date(typeof ts==='number'?ts>1e12?ts:ts*1000:ts);
   var s=Math.floor((Date.now()-d)/1000);
@@ -466,43 +680,46 @@ var ago = function(ts){
   if(s<86400)return Math.floor(s/3600)+'h ago';
   if(s<2592000)return Math.floor(s/86400)+'d ago';
   return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-};
-
-// Get content type definition by id
-function getCT(id){
-  for(var i=0;i<CONTENT_TYPES.length;i++){if(CONTENT_TYPES[i].id===id)return CONTENT_TYPES[i];}
-  return CONTENT_TYPES[0];
 }
-
-// Type label & color from mime
-var tl = function(m){
-  if(!m)return'?';
-  if(m.includes('gif'))return'GIF';if(m.startsWith('image/'))return'IMG';
+function getCT(id){for(var i=0;i<CONTENT_TYPES.length;i++){if(CONTENT_TYPES[i].id===id)return CONTENT_TYPES[i];}return CONTENT_TYPES[0]}
+function tl(m){
+  if(!m)return'?';if(m.includes('gif'))return'GIF';if(m.startsWith('image/'))return'IMG';
   if(m.startsWith('video/'))return'VID';if(m.startsWith('audio/'))return'AUD';
   if(m==='text/html')return'HTML';if(m==='image/svg+xml')return'SVG';
   if(m.includes('javascript'))return'JS';if(m==='text/plain')return'TXT';
-  if(m.includes('gltf')||m.includes('model'))return'3D';
-  if(m.includes('markdown'))return'MD';return'FILE';
-};
-var tc = function(m){
-  if(!m)return'#475569';if(m.includes('gif'))return'#f59e0b';
-  if(m.startsWith('image/'))return'#3b82f6';if(m.startsWith('video/'))return'#ef4444';
-  if(m.startsWith('audio/'))return'#8b5cf6';if(m==='text/html')return'#10b981';
-  if(m==='image/svg+xml')return'#ec4899';if(m.includes('javascript'))return'#f59e0b';
-  if(m==='text/plain')return'#64748b';if(m.includes('model'))return'#06b6d4';
-  if(m.includes('markdown'))return'#84cc16';return'#475569';
-};
-var rc = function(r){return{uncommon:'#10b981',rare:'#60a5fa',epic:'#a78bfa',legendary:'#f59e0b',mythic:'#ef4444'}[r]||null};
-
-// ── STATUS BAR ───────────────────────────────────────────────────────────────
-function sbar(src,err){
-  var b=document.getElementById('sbar');if(!b)return;
-  if(err){b.style.cssText='display:block;padding:5px 20px;font-size:11px;font-weight:600;background:rgba(239,68,68,.07);color:#ef4444;border-bottom:1px solid rgba(239,68,68,.15)';b.innerHTML='&#9888; '+err;}
-  else if(src){b.style.cssText='display:block;padding:5px 20px;font-size:11px;font-weight:600;background:rgba(16,185,129,.05);color:#10b981;border-bottom:1px solid rgba(16,185,129,.1)';b.innerHTML='<span class="live-dot" style="background:#10b981"></span>Live data via '+src;}
-  else{b.style.display='none';}
+  if(m.includes('gltf')||m.includes('model'))return'3D';if(m.includes('markdown'))return'MD';
+  return'FILE';
+}
+function tc(m){
+  if(!m)return'#475569';if(m.includes('gif'))return'#ff6bff';
+  if(m.startsWith('image/'))return'#00f5ff';if(m.startsWith('video/'))return'#ef4444';
+  if(m.startsWith('audio/'))return'#a78bfa';if(m==='text/html')return'#39ff14';
+  if(m==='image/svg+xml')return'#f7931a';if(m.includes('javascript'))return'#fbbf24';
+  if(m==='text/plain')return'#94a3b8';if(m.includes('model'))return'#06b6d4';
+  if(m.includes('markdown'))return'#84cc16';return'#64748b';
+}
+function rc(r){return{uncommon:'#39ff14',rare:'#00f5ff',epic:'#ff6bff',legendary:'#f7931a',mythic:'#ef4444'}[r]||null}
+function fmtFloor(s){if(!s)return'&mdash;';return(s/100000000).toFixed(4)+' BTC'}
+function fmtVol(b){if(!b)return'&mdash;';return parseFloat(b).toFixed(2)+' BTC'}
+function accentFromSlug(slug){
+  var colors=['#f7931a','#10b981','#00f5ff','#ff6bff','#ef4444','#fbbf24','#a78bfa','#39ff14','#f97316','#06b6d4'];
+  var h=0;for(var k=0;k<(slug||'').length;k++)h=(h*31+(slug||'').charCodeAt(k))&0xfffffff;
+  return colors[h%colors.length];
 }
 
-// ── TOAST ────────────────────────────────────────────────────────────────────
+// ── STATUS BAR ────────────────────────────────────────────────────────────────
+function sbar(src,err){
+  var b=document.getElementById('sbar');if(!b)return;
+  if(err){
+    b.style.cssText='display:block;padding:5px 20px;font-size:11px;font-weight:800;background:rgba(239,68,68,0.08);color:#ef4444;border-bottom:1px solid rgba(239,68,68,0.2);letter-spacing:.2px';
+    b.innerHTML='&#9888; '+err;
+  }else if(src){
+    b.style.cssText='display:block;padding:5px 20px;font-size:11px;font-weight:800;background:rgba(57,255,20,0.05);color:#39ff14;border-bottom:1px solid rgba(57,255,20,0.12);letter-spacing:.2px';
+    b.innerHTML='<span class="live-dot" style="background:#39ff14"></span>Live via '+src;
+  }else{b.style.display='none';}
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
 var _tt=null;
 function toast(msg,dur){
   dur=dur||4000;
@@ -512,7 +729,7 @@ function toast(msg,dur){
   _tt=setTimeout(function(){if(t)t.innerHTML='';},dur);
 }
 
-// ── NORMALIZERS ──────────────────────────────────────────────────────────────
+// ── NORMALIZERS ───────────────────────────────────────────────────────────────
 function nOrd(i){
   if(!i)return null;
   var id=i.id||i.inscription_id||'';
@@ -540,26 +757,32 @@ function nBIS(i){
     preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
     genesis_tx:(id||'').replace(/i\d+$/,''),_src:'bis'};
 }
+function normBISCol(c){
+  if(!c||!c.slug)return null;
+  return{slug:c.slug,name:c.name||c.slug,supply:parseInt(c.supply)||0,
+    min_number:c.min_number||0,max_number:c.max_number||0,median_number:c.median_number||0,
+    icon:c.icon_url||c.inscription_icon_id||'',
+    bis_url:c.bis_url||('https://bestinslot.xyz/ordinals/collection/'+c.slug),
+    floor_price:c.floor_price||null,vol_24h:c.vol_24h_in_btc||null,
+    vol_7d:c.vol_7d_in_btc||null,vol_total:c.vol_total_in_btc||null,
+    sale_cnt_total:c.sale_cnt_total||null,listed:c.listed_count||null};
+}
 
-// ── API FETCH ────────────────────────────────────────────────────────────────
+// ── API FETCH ─────────────────────────────────────────────────────────────────
 function apiFetch(url,opts){
   opts=opts||{};
   var c=new AbortController();
-  var t=setTimeout(function(){c.abort();},9000);
+  var t=setTimeout(function(){c.abort();},10000);
   return fetch(url,Object.assign({},opts,{signal:c.signal,headers:Object.assign({'Accept':'application/json'},opts.headers||{})}))
     .then(function(r){clearTimeout(t);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
     .catch(function(e){clearTimeout(t);throw e;});
 }
 
-// Build BIS query params from current state
 function bisSortParam(){
   if(ST.sort==='oldest')return'&sort_by=inscr_num&order=asc';
-  if(ST.sort==='highest')return'&sort_by=inscr_num&order=desc';
-  if(ST.sort==='lowest')return'&sort_by=inscr_num&order=asc';
   if(ST.sort==='rare')return'&sort_by=sat_rarity&order=desc';
-  return'&sort_by=inscr_num&order=desc'; // newest default
+  return'&sort_by=inscr_num&order=desc';
 }
-
 function bisRangeParam(){
   var p='';
   if(ST.rangeFrom)p+='&from_number='+encodeURIComponent(ST.rangeFrom);
@@ -571,83 +794,71 @@ function fetchFeed(off,ct){
   var CT=getCT(ct);
   var mimes=CT.mime||null;
 
-  // Special: Bitmap — BIS has dedicated bitmap endpoint
   if(ct==='bitmap'){
-    return apiFetch(BIS+'/bitmap/all?offset='+off+'&count=24&order='+(ST.sort==='oldest'?'asc':'desc')).then(function(d){
-      var r=(d.data||[]).map(function(b){
-        return{id:b.inscription_id||'',number:b.inscription_number||0,
-          content_type:'text/plain',content_length:0,
-          genesis_block_height:b.genesis_height||0,genesis_timestamp:b.genesis_ts||null,
-          sat_rarity:b.sat_rarity||'common',sat_name:'',address:b.owner_wallet_addr||'',
-          value:546,collection_name:'',collection_slug:'',
-          title:b.bitmap_number!=null?b.bitmap_number+'.bitmap':'',
-          parent:'',children:[],
-          preview:ORD+'/preview/'+(b.inscription_id||''),
-          content:ORD+'/content/'+(b.inscription_id||''),
-          genesis_tx:(b.inscription_id||'').replace(/i\d+$/,''),
-          _bitmap:b.bitmap_number,_src:'bis'};
-      }).filter(Boolean);
-      if(r.length)return{r:r,src:'BestInSlot (Bitmap)',err:null};
-      throw new Error('empty');
-    }).catch(function(){return seedFallback(off,ct);});
+    return apiFetch(BIS+'/bitmap/all?offset='+off+'&count=24&order='+(ST.sort==='oldest'?'asc':'desc'))
+      .then(function(d){
+        var r=(d.data||[]).map(function(b){
+          var id=b.inscription_id||'';
+          return{id:id,number:b.inscription_number||0,content_type:'text/plain',
+            content_length:0,genesis_block_height:b.genesis_height||0,genesis_timestamp:b.genesis_ts||null,
+            sat_rarity:b.sat_rarity||'common',sat_name:'',address:b.owner_wallet_addr||'',
+            value:546,collection_name:'',collection_slug:'',title:b.bitmap_number!=null?b.bitmap_number+'.bitmap':'',
+            parent:'',children:[],preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
+            genesis_tx:(id||'').replace(/i\d+$/,''),_bitmap:b.bitmap_number,_src:'bis'};
+        }).filter(Boolean);
+        if(r.length)return{r:r,src:'BestInSlot (Bitmap)',err:null};
+        throw new Error('empty');
+      }).catch(function(){return seedFallback(off);});
   }
-
-  // Special: Parents — inscriptions that have children
   if(ct==='parent'){
-    return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24&has_children=true'+bisSortParam()+bisRangeParam()).then(function(d){
-      var r=(d.data||[]).map(nBIS).filter(Boolean);
-      if(r.length)return{r:r,src:'BestInSlot (Parents)',err:null};
-      throw new Error('empty');
-    }).catch(function(){return seedFallback(off,ct);});
+    return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24&has_children=true'+bisSortParam()+bisRangeParam())
+      .then(function(d){
+        var r=(d.data||[]).map(nBIS).filter(Boolean);
+        if(r.length)return{r:r,src:'BestInSlot (Parents)',err:null};
+        throw new Error('empty');
+      }).catch(function(){return seedFallback(off);});
   }
-
-  // Special: Games — HTML inscriptions tagged as games by BIS
   if(ct==='game'){
-    return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24&mime_type=text%2Fhtml&is_game=true'+bisSortParam()).then(function(d){
-      var r=(d.data||[]).map(nBIS).filter(Boolean);
-      if(r.length)return{r:r,src:'BestInSlot (Games)',err:null};
-      throw new Error('empty');
-    }).catch(function(){
-      // Fallback: just HTML
-      return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24&mime_type=text%2Fhtml'+bisSortParam()).then(function(d){
+    return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24&mime_type=text%2Fhtml'+bisSortParam())
+      .then(function(d){
         var r=(d.data||[]).map(nBIS).filter(Boolean);
         if(r.length)return{r:r,src:'BestInSlot (HTML/Games)',err:null};
         throw new Error('empty');
-      }).catch(function(){return seedFallback(off,ct);});
-    });
+      }).catch(function(){return seedFallback(off);});
   }
 
-  // Standard: proxy → BIS → Ordiscan → seed
-  var proxyPath='/inscriptions'+(ST.sort==='oldest'?'/0':''+(Math.floor(off/20)>0?'/'+Math.floor(off/20):''));
-  return apiFetch(PROXY+proxyPath).then(function(d){
-    var ids=d.inscriptions||[];
-    if(!ids.length)throw new Error('empty');
-    var r=ids.slice(0,24).map(function(id){
-      return{id:id,number:0,content_type:'',content_length:0,genesis_block_height:0,
-        genesis_timestamp:null,sat_rarity:'common',sat_name:'',address:'',value:546,
-        collection_name:'',collection_slug:'',title:'',parent:'',children:[],
-        preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
-        genesis_tx:id.replace(/i\d+$/,''),_ord:true};
-    });
-    return{r:r,src:'ordinals.com (proxy)',err:null};
-  }).catch(function(){
-    // BIS fallback
-    var mq=mimes?('&mime_type='+encodeURIComponent(mimes.split(',')[0])):'';
-    return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24'+bisSortParam()+mq+bisRangeParam()).then(function(d){
-      var r=(d.data||[]).map(nBIS).filter(Boolean);
-      if(r.length)return{r:r,src:'BestInSlot',err:null};
-      throw new Error('empty');
+  var proxyPage=Math.floor(off/20);
+  return apiFetch(PROXY+'/inscriptions'+(proxyPage>0?'/'+proxyPage:''))
+    .then(function(d){
+      var ids=d.inscriptions||[];
+      if(!ids.length)throw new Error('empty');
+      var r=ids.slice(0,24).map(function(id){
+        return{id:id,number:0,content_type:'',content_length:0,genesis_block_height:0,
+          genesis_timestamp:null,sat_rarity:'common',sat_name:'',address:'',value:546,
+          collection_name:'',collection_slug:'',title:'',parent:'',children:[],
+          preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
+          genesis_tx:id.replace(/i\d+$/,''),_ord:true};
+      });
+      return{r:r,src:'ordinals.com',err:null};
     }).catch(function(){
-      return apiFetch(ORDSCAN+'/inscriptions?page='+(Math.floor(off/24)+1)).then(function(d){
-        var r=(d.data||d.results||[]).map(nOrd).filter(Boolean);
-        if(r.length)return{r:r,src:'Ordiscan',err:null};
-        throw new Error('empty');
-      }).catch(function(){return seedFallback(off,ct);});
+      var mq=mimes?('&mime_type='+encodeURIComponent(mimes.split(',')[0])):'';
+      return apiFetch(BIS+'/inscription/all?offset='+off+'&count=24'+bisSortParam()+mq+bisRangeParam())
+        .then(function(d){
+          var r=(d.data||[]).map(nBIS).filter(Boolean);
+          if(r.length)return{r:r,src:'BestInSlot',err:null};
+          throw new Error('empty');
+        }).catch(function(){
+          return apiFetch(ORDSCAN+'/inscriptions?page='+(Math.floor(off/24)+1))
+            .then(function(d){
+              var r=(d.data||d.results||[]).map(nOrd).filter(Boolean);
+              if(r.length)return{r:r,src:'Ordiscan',err:null};
+              throw new Error('empty');
+            }).catch(function(){return seedFallback(off);});
+        });
     });
-  });
 }
 
-function seedFallback(off,ct){
+function seedFallback(off){
   var r=SEEDS.slice(0,24).map(function(id,i){
     return{id:id,number:126393671-(off+i)*7,content_type:'',content_length:0,
       genesis_block_height:949146-Math.floor((off+i)/10),
@@ -657,22 +868,20 @@ function seedFallback(off,ct){
       preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,
       genesis_tx:id.replace(/i\d+$/,''),_seed:true};
   });
-  return{r:r,src:'ordinals.com (seed)',
-    err:'APIs unavailable &mdash; showing known inscriptions. <a href="https://github.com/Web3StudioTech/OrdExplorer" target="_blank" style="color:#f7931a">Deploy the proxy</a> for live data.'};
+  return{r:r,src:'ordinals.com (seed)',err:'APIs unavailable &mdash; showing known inscriptions. Deploy proxy for live data.'};
 }
 
 function fetchOne(id){
-  return apiFetch(PROXY+'/inscription/'+id).then(function(d){
-    var item=nOrd(d);if(item&&item.id)return{data:item,src:'ordinals.com'};throw new Error('empty');
-  }).catch(function(){
-    return apiFetch(BIS+'/inscription/single_info_id?inscription_id='+encodeURIComponent(id)).then(function(d){
-      var item=nBIS(d.data||d);if(item&&item.id)return{data:item,src:'BestInSlot'};throw new Error('empty');
-    }).catch(function(){return{data:null,src:null};});
-  });
+  return apiFetch(PROXY+'/inscription/'+id)
+    .then(function(d){var i=nOrd(d);if(i&&i.id)return{data:i,src:'ordinals.com'};throw new Error('empty');})
+    .catch(function(){
+      return apiFetch(BIS+'/inscription/single_info_id?inscription_id='+encodeURIComponent(id))
+        .then(function(d){var i=nBIS(d.data||d);if(i&&i.id)return{data:i,src:'BestInSlot'};throw new Error('empty');})
+        .catch(function(){return{data:null,src:null};});
+    });
 }
 
 function fetchAddr(addr){
-  // Wallet native first
   if(ST.wallet){
     if(ST.wallet.type==='unisat'&&window.unisat&&window.unisat.getInscriptions){
       return window.unisat.getInscriptions(0,100).then(function(res){
@@ -712,77 +921,108 @@ function mkWI(id,num,col,addr){
 }
 
 function fetchAddrAPI(addr){
-  return apiFetch(PROXY+'/address/'+encodeURIComponent(addr)).then(function(d){
-    var ids=d.inscriptions||[];
-    var r=ids.slice(0,60).map(function(id){
-      return{id:id,number:0,content_type:'',content_length:0,genesis_block_height:0,
-        genesis_timestamp:null,sat_rarity:'common',sat_name:'',address:addr,value:546,
-        collection_name:'',collection_slug:'',title:'',parent:'',children:[],
-        preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,genesis_tx:id.replace(/i\d+$/,'')};
+  return apiFetch(PROXY+'/address/'+encodeURIComponent(addr))
+    .then(function(d){
+      var ids=d.inscriptions||[];
+      return{r:ids.slice(0,60).map(function(id){
+        return{id:id,number:0,content_type:'',content_length:0,genesis_block_height:0,
+          genesis_timestamp:null,sat_rarity:'common',sat_name:'',address:addr,value:546,
+          collection_name:'',collection_slug:'',title:'',parent:'',children:[],
+          preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,genesis_tx:id.replace(/i\d+$/,'')};
+      }),src:'ordinals.com',extra:d};
+    }).catch(function(){
+      return apiFetch(BIS+'/wallet/inscriptions?address='+encodeURIComponent(addr)+'&sort_by=inscr_num&order=desc&offset=0&count=60')
+        .then(function(d){return{r:(d.data||[]).map(nBIS).filter(Boolean),src:'BestInSlot'};})
+        .catch(function(){return{r:[],src:'&mdash;'};});
     });
-    return{r:r,src:'ordinals.com',extra:d};
-  }).catch(function(){
-    return apiFetch(BIS+'/wallet/inscriptions?address='+encodeURIComponent(addr)+'&sort_by=inscr_num&order=desc&offset=0&count=60').then(function(d){
-      return{r:(d.data||[]).map(nBIS).filter(Boolean),src:'BestInSlot'};
-    }).catch(function(){return{r:[],src:'&mdash;'};});
-  });
 }
 
 function fetchBlock(h){
-  return apiFetch(PROXY+'/block/'+h).then(function(d){
-    var ids=d.inscriptions||[];
-    return{r:ids.map(function(id){
-      return{id:id,number:0,content_type:'',content_length:0,genesis_block_height:h,
-        genesis_timestamp:null,sat_rarity:'common',sat_name:'',address:'',value:546,
-        collection_name:'',collection_slug:'',title:'',parent:'',children:[],
-        preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,genesis_tx:id.replace(/i\d+$/,'')};
-    }),src:'ordinals.com',blockData:d};
-  }).catch(function(){
-    return apiFetch(BIS+'/inscription/new_inscriptions_in_block?block_height='+h).then(function(d){
-      return{r:(d.data||[]).map(nBIS).filter(Boolean),src:'BestInSlot',blockData:null};
-    }).catch(function(){return{r:[],src:null,blockData:null};});
-  });
+  return apiFetch(PROXY+'/block/'+h)
+    .then(function(d){
+      return{r:(d.inscriptions||[]).map(function(id){
+        return{id:id,number:0,content_type:'',content_length:0,genesis_block_height:h,
+          genesis_timestamp:null,sat_rarity:'common',sat_name:'',address:'',value:546,
+          collection_name:'',collection_slug:'',title:'',parent:'',children:[],
+          preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,genesis_tx:id.replace(/i\d+$/,'')};
+      }),src:'ordinals.com',blockData:d};
+    }).catch(function(){
+      return apiFetch(BIS+'/inscription/new_inscriptions_in_block?block_height='+h)
+        .then(function(d){return{r:(d.data||[]).map(nBIS).filter(Boolean),src:'BestInSlot',blockData:null};})
+        .catch(function(){return{r:[],src:null,blockData:null};});
+    });
 }
 
 function fetchSat(sat){
-  return apiFetch(PROXY+'/sat/'+sat).then(function(d){return{data:d,src:'ordinals.com'};})
-    .catch(function(){return{data:null,src:null};});
+  return apiFetch(PROXY+'/sat/'+sat).then(function(d){return{data:d,src:'ordinals.com'};}).catch(function(){return{data:null,src:null};});
 }
 
-function fetchCollection(slug){
-  return apiFetch(BIS+'/collection/inscriptions?slug='+encodeURIComponent(slug)+'&sort_by=inscr_num&order=asc&offset=0&count=24').then(function(d){
-    return{r:(d.data||[]).map(nBIS).filter(Boolean),src:'BestInSlot'};
-  }).catch(function(){return{r:[],src:null};});
+function fetchCollectionItems(slug){
+  return apiFetch(BIS+'/collection/inscriptions?slug='+encodeURIComponent(slug)+'&sort_by=inscr_num&order=asc&offset=0&count=24')
+    .then(function(d){return{r:(d.data||[]).map(nBIS).filter(Boolean),src:'BestInSlot'};})
+    .catch(function(){return{r:[],src:null};});
 }
 
-// ── CARD ─────────────────────────────────────────────────────────────────────
+// ── COLLECTIONS DATA ENGINE ───────────────────────────────────────────────────
+function loadCollections(onDone){
+  if(ST.COL_LOADED&&ST.COL_CACHE.length){onDone(ST.COL_CACHE);return;}
+  fetch('./collections.json').then(function(r){if(!r.ok)throw new Error('no file');return r.json();})
+    .then(function(d){
+      var list=d.collections||d;
+      if(!Array.isArray(list)||!list.length)throw new Error('empty');
+      ST.COL_CACHE=list;ST.COL_LOADED=true;ST.COL_HAS_MORE=false;
+      ST.COL_SOURCE='collections.json (local backup &mdash; '+list.length.toLocaleString()+' collections)';
+      onDone(ST.COL_CACHE);
+    }).catch(function(){
+      ST.COL_SOURCE='BestInSlot (live)';
+      fetchBISCols(0,onDone);
+    });
+}
+function fetchBISCols(offset,onDone){
+  if(ST.COL_LOADING)return;
+  ST.COL_LOADING=true;
+  apiFetch(BIS+'/collection/collections?sort_by=median_number&order=asc&offset='+offset+'&count=100')
+    .then(function(d){
+      var items=(d.data||[]).map(normBISCol).filter(Boolean);
+      ST.COL_CACHE=ST.COL_CACHE.concat(items);
+      ST.COL_OFFSET=offset+items.length;
+      ST.COL_HAS_MORE=items.length>=100;
+      ST.COL_LOADING=false;
+      if(onDone)onDone(ST.COL_CACHE);
+    }).catch(function(){
+      ST.COL_LOADING=false;
+      if(onDone)onDone(ST.COL_CACHE);
+    });
+}
+function loadMoreBISCols(onDone){
+  if(!ST.COL_HAS_MORE||ST.COL_LOADING){if(onDone)onDone([]);return;}
+  fetchBISCols(ST.COL_OFFSET,onDone);
+}
+
+// ── CARD HTML ─────────────────────────────────────────────────────────────────
 function cardHTML(item,onclick,delay){
   delay=delay||0;
   var rclr=rc(item.sat_rarity);
   var preview=item.preview||ORD+'/preview/'+(item.id||'');
   var isBitmap=item._bitmap!=null;
   var label=isBitmap?(item._bitmap+'.bitmap'):(item.title||('#'+fn(item.number)));
+  var typeColor=tc(item.content_type);
 
   var mediaInner;
   if(isBitmap){
-    // Bitmap: show number.bitmap display instead of iframe (they're just text)
-    mediaInner='<div class="bitmap-preview">'
-      +'<div class="bitmap-num">'+item._bitmap+'</div>'
-      +'<div class="bitmap-label">.BITMAP</div>'
-      +'</div>';
-  } else if(preview){
+    mediaInner='<div class="bitmap-preview"><div class="bitmap-num">'+item._bitmap+'</div><div class="bitmap-lbl">.BITMAP</div></div>';
+  }else if(preview){
     mediaInner='<iframe src="'+preview+'" sandbox="allow-scripts allow-same-origin" loading="lazy" style="width:100%;height:100%" title="'+label+'"></iframe>';
-  } else {
-    mediaInner='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#1a2535;font-size:32px">&#8982;</div>';
+  }else{
+    mediaInner='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--border2);font-size:32px">&#9974;</div>';
   }
 
   return '<div class="card fade" onclick="'+onclick+'" style="animation-delay:'+delay.toFixed(2)+'s">'
     +'<div class="card-media">'
     +mediaInner
-    +'<span class="badge" style="background:'+(isBitmap?'#fbbf24':tc(item.content_type))+'">'+
-      (isBitmap?'BMP':tl(item.content_type))+'</span>'
-    +(rclr?'<span class="rbadge" style="background:'+rclr+'22;color:'+rclr+'">'+(item.sat_rarity||'').slice(0,3).toUpperCase()+'</span>':'')
-    +(item.sat_name?'<span class="bitmap-badge">'+item.sat_name+'</span>':'')
+    +'<span class="badge" style="background:'+typeColor+'">'+tl(item.content_type)+'</span>'
+    +(rclr?'<span class="rbadge" style="background:'+rclr+'22;color:'+rclr+';border:1px solid '+rclr+'44">'+(item.sat_rarity||'').slice(0,3).toUpperCase()+'</span>':'')
+    +(item.sat_name?'<span style="position:absolute;bottom:7px;right:7px;background:rgba(251,191,36,0.2);color:#fbbf24;font-size:9px;font-weight:900;padding:2px 7px;border-radius:20px">'+item.sat_name+'</span>':'')
     +(item.collection_name?'<div class="colbadge">'+item.collection_name+'</div>':'')
     +'</div>'
     +'<div class="card-body">'
@@ -793,22 +1033,20 @@ function cardHTML(item,onclick,delay){
 }
 
 function skCard(){
-  return'<div class="card" style="cursor:default">'
-    +'<div class="card-media sk"></div>'
-    +'<div class="card-body">'
-    +'<div class="sk" style="height:12px;width:55%;margin-bottom:7px"></div>'
-    +'<div class="sk" style="height:10px;width:75%"></div>'
-    +'</div></div>';
+  return'<div class="card" style="cursor:default"><div class="card-media sk"></div>'
+    +'<div class="card-body"><div class="sk" style="height:12px;width:55%;margin-bottom:7px"></div>'
+    +'<div class="sk" style="height:10px;width:75%"></div></div></div>';
 }
 function skCards(n){return Array.from({length:n||24}).map(skCard).join('');}
 
-// ── NAV ──────────────────────────────────────────────────────────────────────
+// ── NAV ───────────────────────────────────────────────────────────────────────
 function setNav(p){
   ['home','collections','runes','blocks','sats','stats'].forEach(function(n){
     var b=document.getElementById('n-'+n);if(b)b.className='nl'+(n===p?' on':'');
   });
 }
-function go(p){ST.page=p;setNav(p);
+function go(p){
+  ST.page=p;setNav(p);
   if(p==='home')renderHome();
   else if(p==='collections')renderCollections();
   else if(p==='runes')renderRunes();
@@ -817,67 +1055,62 @@ function go(p){ST.page=p;setNav(p);
   else if(p==='stats')renderStats();
 }
 
-// ── HOME PAGE — FULL FILTER SYSTEM ───────────────────────────────────────────
+// ── HOME PAGE ─────────────────────────────────────────────────────────────────
 function renderHome(){
   setNav('home');sbar(null,null);
   var pg=document.getElementById('pg');pg.className='fade';
 
-  // Build content type tabs (matching ord.io exactly)
   var typeTabs=CONTENT_TYPES.map(function(ct){
     var extra='';
-    if(ct.id==='bitmap')extra=' tab-bitmap';
+    if(ct.id==='gif')extra=' tab-gif';
+    if(ct.id==='html')extra=' tab-html';
     if(ct.id==='game')extra=' tab-game';
-    if(ct.id==='parent')extra=' tab-special';
+    if(ct.id==='bitmap')extra=' tab-bitmap';
+    if(ct.id==='parent')extra=' tab-parent';
     return'<button class="tab'+extra+(ST.contentType===ct.id?' on':'')+'" onclick="setContentType(\''+ct.id+'\')">'+ct.label+'</button>';
   }).join('');
 
-  // Trending tabs (1H 1D 1W 1M All)
   var trendTabs=TRENDING.map(function(t){
-    return'<button class="tab'+(ST.trending===t.id?' on':'')+'" onclick="setTrending(\''+t.id+'\')" style="font-size:10px;padding:3px 9px">'+t.label+'</button>';
+    return'<button class="trend-btn'+(ST.trending===t.id?' on':'')+'" onclick="setTrending(\''+t.id+'\')">'+t.label+'</button>';
   }).join('');
 
-  // Sort buttons
   var sortBtns=SORT_OPTS.map(function(s){
     return'<button class="sort-btn'+(ST.sort===s.id?' on':'')+'" onclick="setSort(\''+s.id+'\')">'+s.label+'</button>';
   }).join('');
 
+  var satBtns=['','uncommon','rare','epic','legendary','mythic','pizza','vintage','black','omega'].map(function(s){
+    var lbl=s?(s.charAt(0).toUpperCase()+s.slice(1)):'All';
+    var clr=s?(rc(s)||'var(--accent2)'):'var(--text3)';
+    return'<button class="sort-btn'+(ST.satribute===s?' on':'')+'" onclick="setSatribute(\''+s+'\')" style="color:'+clr+'">'+lbl+'</button>';
+  }).join('');
+
   pg.innerHTML=
-    // Hero
-    '<div style="padding:16px 20px 12px;border-bottom:1px solid #141f2e;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px">'
+    '<div class="hero-strip">'
       +'<div>'
-        +'<div style="font-size:19px;font-weight:800;color:#f7931a;letter-spacing:-.3px">Bitcoin Inscriptions</div>'
-        +'<div style="font-size:11px;color:#304055;margin-top:3px">~126M+ on-chain &middot; ordinals.com &rarr; BestInSlot &rarr; Ordiscan</div>'
+        +'<div class="hero-title float-el">&#128248; Bitcoin Inscriptions</div>'
+        +'<div class="hero-sub">~126M+ on-chain forever &middot; ordinals.com &rarr; BestInSlot &rarr; Ordiscan</div>'
       +'</div>'
       +'<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">'
-        +'<span style="font-size:10px;font-weight:700;color:#304055">TRENDING</span>'
-        +trendTabs
+        +'<span class="sort-label">&#128293; TRENDING</span>'+trendTabs
       +'</div>'
     +'</div>'
-    // Filter bar — content types
     +'<div id="filter-wrap">'
       +'<div class="fbar-row">'+typeTabs+'</div>'
-      // Sort row + Range filter + Satributes
       +'<div class="sort-row">'
-        +'<span class="sort-label">SORT</span>'
-        +sortBtns
+        +'<span class="sort-label">SORT</span>'+sortBtns
         +'<div class="fdivider"></div>'
         +'<span class="sort-label">RANGE</span>'
-        +'<input class="range-input" id="rf" placeholder="From #" value="'+ST.rangeFrom+'" oninput="ST.rangeFrom=this.value">'
-        +'<span style="font-size:11px;color:#304055">&rarr;</span>'
-        +'<input class="range-input" id="rt" placeholder="To #" value="'+ST.rangeTo+'" oninput="ST.rangeTo=this.value">'
-        +'<button class="go-btn" onclick="applyRange()">Go</button>'
+        +'<input class="range-in" id="rf" placeholder="From #" value="'+ST.rangeFrom+'" oninput="ST.rangeFrom=this.value">'
+        +'<span style="font-size:11px;color:var(--text3);font-weight:800">&rarr;</span>'
+        +'<input class="range-in" id="rt" placeholder="To #" value="'+ST.rangeTo+'" oninput="ST.rangeTo=this.value">'
+        +'<button class="go-btn" onclick="loadFeed(true)">Go</button>'
         +'<div class="fdivider"></div>'
-        +'<span class="sort-label">SATRIBUTES</span>'
-        +['','uncommon','rare','epic','legendary','mythic','pizza','vintage','black','omega'].map(function(s){
-          return'<button class="tab tab-special'+(ST.satribute===s&&s?' on':'')+'" onclick="setSatribute(\''+s+'\')" style="font-size:10px;padding:3px 9px">'+(s?s.charAt(0).toUpperCase()+s.slice(1):'All')+'</button>';
-        }).join('')
+        +'<span class="sort-label">&#10022; SATS</span>'+satBtns
       +'</div>'
     +'</div>'
-    // Source indicator
-    +'<div class="src-row"><span class="live-dot" style="background:#10b981"></span><span id="src-txt">Connecting&hellip;</span></div>'
-    // Grid
+    +'<div class="src-row"><span class="live-dot" style="background:#39ff14"></span><span id="src-txt">Connecting&#8230;</span></div>'
     +'<div class="grid" id="cg">'+skCards()+'</div>'
-    +'<div style="text-align:center;padding:4px 0 36px" id="lmw"></div>';
+    +'<div style="text-align:center;padding:4px 0 40px" id="lmw"></div>';
 
   loadFeed(true);
 }
@@ -893,34 +1126,29 @@ function loadFeed(reset){
     ST.off=ST.items.length;ST.hasMore=res.r.length>=20;ST.src=res.src;
     sbar(res.err?null:res.src,res.err);
     var st=document.getElementById('src-txt');
-    if(st)st.innerHTML=res.err?'APIs unavailable \u2014 showing seed inscriptions':fn(ST.items.length)+' inscriptions \u00b7 via '+res.src;
+    if(st)st.innerHTML=res.err?'&#9888; APIs unavailable &mdash; seed inscriptions shown':fn(ST.items.length)+' inscriptions &middot; via '+res.src;
     if(cg){
       if(reset)cg.innerHTML='';
       var base=ST.items.length-res.r.length;
       cg.innerHTML+=res.r.map(function(item,i){return cardHTML(item,'openIns('+(base+i)+')',i*0.022);}).join('');
     }
-    if(lmw&&ST.hasMore)lmw.innerHTML='<button class="load-more" onclick="loadFeed()">Load More</button>';
+    if(lmw&&ST.hasMore)lmw.innerHTML='<button class="load-more" onclick="loadFeed(false)">&#9660; Load More</button>';
     ST.loading=false;
   });
 }
 
-// Filter setters — each resets the feed
 function setContentType(id){
   ST.contentType=id;
-  // Update URL param (for shareability)
   if(history.replaceState)history.replaceState(null,'','?content-type='+id);
   renderHome();
 }
 function setTrending(id){ST.trending=id;loadFeed(true);}
 function setSort(id){ST.sort=id;loadFeed(true);}
-function applyRange(){loadFeed(true);}
 function setSatribute(s){ST.satribute=s;loadFeed(true);}
 
-// Read URL params on load
 function readUrlParams(){
-  var params=new URLSearchParams(window.location.search);
-  var ct=params.get('content-type');
-  if(ct){ST.contentType=ct;}
+  var p=new URLSearchParams(window.location.search);
+  var ct=p.get('content-type');if(ct)ST.contentType=ct;
 }
 
 // ── INSCRIPTION DETAIL ────────────────────────────────────────────────────────
@@ -931,79 +1159,74 @@ function renderDetail(item){
   setNav(null);sbar(null,null);
   var pg=document.getElementById('pg');pg.className='fade';
   var markets=[
-    {n:'ordinals.com',    u:ORD+'/inscription/'+item.id},
-    {n:'Ordinals Wallet', u:'https://ordinalswallet.com/inscription/'+item.id},
-    {n:'Magic Eden',      u:'https://magiceden.us/ordinals/item-details/'+item.id},
-    {n:'UniSat',          u:'https://unisat.io/inscription/'+item.id},
-    {n:'OKX NFT',         u:'https://web3.okx.com/nft/btc/'+item.id},
-    {n:'Best in Slot',    u:'https://bestinslot.xyz/ordinals/inscription/'+item.id},
-    {n:'Magisat',         u:'https://magisat.io/inscription/'+item.id},
-    {n:'Satflow',         u:'https://satflow.com/inscription/'+item.id},
+    {n:'&#127760; ordinals.com',u:ORD+'/inscription/'+item.id},
+    {n:'&#127908; Ordinals Wallet',u:'https://ordinalswallet.com/inscription/'+item.id},
+    {n:'&#129680; Magic Eden',u:'https://magiceden.us/ordinals/item-details/'+item.id},
+    {n:'&#9889; UniSat',u:'https://unisat.io/inscription/'+item.id},
+    {n:'&#11035; OKX NFT',u:'https://web3.okx.com/nft/btc/'+item.id},
+    {n:'&#127942; Best in Slot',u:'https://bestinslot.xyz/ordinals/inscription/'+item.id},
+    {n:'&#127981; Magisat',u:'https://magisat.io/inscription/'+item.id},
+    {n:'&#128004; Satflow',u:'https://satflow.com/inscription/'+item.id},
   ];
   var isBitmap=item._bitmap!=null;
   pg.innerHTML=
     '<div class="detail-wrap">'
-      +'<button class="back-btn" onclick="go(ST.page===\'home\'?\'home\':ST.page)">'
-        +'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Back'
+      +'<button class="back-btn" onclick="go(\'home\')">'
+        +'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>'
+        +'Back to Feed'
       +'</button>'
       +'<div class="detail-grid">'
-
-        // LEFT
         +'<div>'
-          +'<div style="aspect-ratio:1;background:#050810;border-radius:14px;border:1px solid #141f2e;overflow:hidden;position:relative">'
+          +'<div style="aspect-ratio:1;background:var(--bg);border-radius:16px;border:1.5px solid var(--border2);overflow:hidden;position:relative;box-shadow:0 0 40px rgba(247,147,26,0.08)">'
             +(isBitmap
-              ?'<div class="bitmap-preview" style="border-radius:14px"><div style="font-size:60px;font-weight:900;color:#fbbf24">'+item._bitmap+'</div><div class="bitmap-label" style="font-size:14px">.BITMAP</div></div>'
+              ?'<div class="bitmap-preview" style="border-radius:16px"><div class="bitmap-num" style="font-size:60px">'+item._bitmap+'</div><div class="bitmap-lbl" style="font-size:14px">.BITMAP</div></div>'
               :'<iframe src="'+item.preview+'" sandbox="allow-scripts allow-same-origin" style="width:100%;height:100%" title="Inscription '+fn(item.number)+'"></iframe>')
-            +'<span class="badge" style="background:'+(isBitmap?'#fbbf24':tc(item.content_type))+';top:10px;left:10px;font-size:10px;padding:3px 8px">'+(isBitmap?'BITMAP':tl(item.content_type))+'</span>'
+            +'<span class="badge" style="background:'+tc(item.content_type)+';top:10px;left:10px;font-size:10px;padding:3px 9px">'+tl(item.content_type)+'</span>'
           +'</div>'
-          +'<div style="display:flex;gap:7px;margin-top:11px;flex-wrap:wrap">'
+          +'<div style="display:flex;gap:7px;margin-top:12px;flex-wrap:wrap">'
             +'<a href="'+item.content+'" target="_blank" class="btn-orange">Raw Content &#8599;</a>'
             +'<a href="'+item.preview+'" target="_blank" class="btn-ghost">Preview &#8599;</a>'
             +'<a href="'+ORD+'/inscription/'+item.id+'" target="_blank" class="btn-ghost">ordinals.com &#8599;</a>'
           +'</div>'
-          +'<div class="surface" style="padding:15px;margin-top:11px">'
-            +'<div class="section-label">View &amp; Trade</div>'
+          +'<div class="surface" style="padding:16px;margin-top:12px">'
+            +'<div class="section-label">&#127919; View &amp; Trade</div>'
             +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+markets.map(function(m){return'<a href="'+m.u+'" target="_blank" class="mlink">'+m.n+' &#8599;</a>';}).join('')+'</div>'
           +'</div>'
         +'</div>'
-
-        // RIGHT
         +'<div style="display:flex;flex-direction:column;gap:14px">'
           +'<div>'
-            +'<div style="font-size:22px;font-weight:800;color:#f7931a;letter-spacing:-.3px;margin-bottom:5px">'
+            +'<div style="font-family:var(--font-display);font-size:28px;color:var(--accent);letter-spacing:1px;margin-bottom:6px;text-shadow:0 0 20px rgba(247,147,26,0.3)">'
               +(isBitmap?item._bitmap+'.bitmap':'Inscription #'+fn(item.number))
             +'</div>'
-            +(item.collection_name?'<div style="font-size:12px;color:#a78bfa;font-weight:600;margin-bottom:6px;cursor:pointer" onclick="openCollection(\''+item.collection_slug+'\',\''+item.collection_name+'\')">'+item.collection_name+' &rarr;</div>':'')
-            +'<div style="font-size:10px;color:#304055;word-break:break-all;line-height:1.7;margin-bottom:10px">'+item.id+'</div>'
+            +(item.collection_name?'<div style="font-size:12px;color:var(--accent2);font-weight:800;margin-bottom:7px;cursor:pointer;letter-spacing:.3px" onclick="openCollection(\''+item.collection_slug+'\',\''+item.collection_name+'\')">&#127912; '+item.collection_name+' &rarr;</div>':'')
+            +'<div style="font-size:10px;color:var(--text3);word-break:break-all;line-height:1.7;margin-bottom:10px;font-weight:700">'+item.id+'</div>'
             +'<div style="display:flex;gap:7px;flex-wrap:wrap">'
-              +'<button onclick="cpID()" class="btn-orange">Copy ID</button>'
-              +'<button id="load-btn" onclick="loadMeta(\''+item.id+'\')" class="btn-ghost">Load Full Metadata</button>'
+              +'<button onclick="cpID()" class="btn-orange">&#128203; Copy ID</button>'
+              +'<button id="load-btn" onclick="loadMeta(\''+item.id+'\')" class="btn-ghost">&#128269; Load Metadata</button>'
             +'</div>'
           +'</div>'
           +'<div class="surface" id="meta-box">'
-            +'<div style="padding:10px 16px;border-bottom:1px solid #0e1a28"><div class="section-label" style="margin:0">Metadata</div></div>'
+            +'<div style="padding:10px 16px;border-bottom:1px solid var(--border)"><div class="section-label" style="margin:0">&#128203; Metadata</div></div>'
             +buildMeta(item)
           +'</div>'
           +(item.sat_rarity&&item.sat_rarity!=='common'
-            ?'<div class="surface" style="padding:15px;border-color:'+(rc(item.sat_rarity)||'#141f2e')+'">'
-              +'<div class="section-label" style="color:'+(rc(item.sat_rarity)||'#304055')+'">Satribute &#10022;</div>'
-              +'<div style="font-size:17px;font-weight:800;color:'+(rc(item.sat_rarity)||'#d8e0ea')+'">'+(item.sat_rarity||'').toUpperCase()+'</div>'
-              +'<div style="font-size:11px;color:#5a7090;margin-top:3px">This inscription lives on a '+(item.sat_rarity||'')+' satoshi</div>'
+            ?'<div class="surface2" style="padding:15px;border-color:'+(rc(item.sat_rarity)||'var(--border2)')+';box-shadow:0 0 20px '+(rc(item.sat_rarity)||'transparent')+'22">'
+              +'<div class="section-label" style="color:'+(rc(item.sat_rarity)||'var(--accent2)')+'">&#10022; Satribute</div>'
+              +'<div style="font-family:var(--font-display);font-size:22px;color:'+(rc(item.sat_rarity)||'var(--text)')+';letter-spacing:1px;text-shadow:0 0 12px '+(rc(item.sat_rarity)||'transparent')+'66">'+(item.sat_rarity||'').toUpperCase()+'</div>'
+              +'<div style="font-size:11px;color:var(--text2);margin-top:4px;font-weight:700">This inscription lives on a '+(item.sat_rarity||'')+' satoshi</div>'
             +'</div>'
             :'')
           +(item.genesis_tx
             ?'<div class="surface" style="padding:15px">'
-              +'<div class="section-label">Genesis Transaction</div>'
-              +'<div style="font-size:10px;color:#5a7090;word-break:break-all;margin-bottom:9px">'+item.genesis_tx+'</div>'
+              +'<div class="section-label">&#128279; Genesis TX</div>'
+              +'<div style="font-size:10px;color:var(--text2);word-break:break-all;margin-bottom:9px;font-weight:700">'+item.genesis_tx+'</div>'
               +'<a href="'+ORD+'/tx/'+item.genesis_tx+'" target="_blank" class="mlink">View on ordinals.com &#8599;</a>'
             +'</div>'
             :'')
           +(item.children&&item.children.length
             ?'<div class="surface" style="padding:15px">'
-              +'<div class="section-label">Children ('+item.children.length+')</div>'
-              +'<div style="display:flex;flex-wrap:wrap;gap:6px">'
-                +item.children.slice(0,8).map(function(cid){return'<a href="'+ORD+'/inscription/'+cid+'" target="_blank" class="mlink">'+cid.slice(0,12)+'&hellip; &#8599;</a>';}).join('')
-              +'</div>'
+              +'<div class="section-label">&#128106; Children ('+item.children.length+')</div>'
+              +'<div style="display:flex;flex-wrap:wrap;gap:6px">'+item.children.slice(0,8).map(function(cid){return'<a href="'+ORD+'/inscription/'+cid+'" target="_blank" class="mlink">'+cid.slice(0,12)+'&hellip; &#8599;</a>';}).join('')+'</div>'
             +'</div>'
             :'')
         +'</div>'
@@ -1016,31 +1239,32 @@ function buildMeta(item){
     {l:'Inscription #',v:fn(item.number)},
     {l:'Content Type',v:item.content_type||'Unknown'},
     {l:'Content Size',v:fb(item.content_length)},
-    {l:'Genesis Block',v:item.genesis_block_height?'<a href="'+ORD+'/block/'+item.genesis_block_height+'" target="_blank" style="color:#f7931a;text-decoration:none">'+fn(item.genesis_block_height)+' &#8599;</a>':'&mdash;'},
+    {l:'Genesis Block',v:item.genesis_block_height
+      ?'<a href="'+ORD+'/block/'+item.genesis_block_height+'" target="_blank" style="color:var(--accent);text-decoration:none;font-weight:800">'+fn(item.genesis_block_height)+' &#8599;</a>':'&mdash;'},
     {l:'Timestamp',v:item.genesis_timestamp?new Date(item.genesis_timestamp).toUTCString():'&mdash;'},
     {l:'Sat Rarity',v:item.sat_rarity||'common',rclr:rc(item.sat_rarity)},
     {l:'Sat Name',v:item.sat_name||'&mdash;'},
     {l:'Value',v:item.value?fn(item.value)+' sats':'&mdash;'},
-    {l:'Parent',v:item.parent?'<a href="'+ORD+'/inscription/'+item.parent+'" target="_blank" style="color:#f7931a;font-size:10px">'+si(item.parent)+' &#8599;</a>':'&mdash;'},
-    {l:'Owner',v:item.address?'<span style="color:#f7931a;cursor:pointer" onclick="openAddr(\''+item.address+'\')">'+sa(item.address)+'</span>':'&mdash;'},
+    {l:'Parent',v:item.parent?'<a href="'+ORD+'/inscription/'+item.parent+'" target="_blank" style="color:var(--accent2);font-size:10px;font-weight:800">'+si(item.parent)+' &#8599;</a>':'&mdash;'},
+    {l:'Owner',v:item.address?'<span style="color:var(--accent);cursor:pointer;font-weight:800" onclick="openAddr(\''+item.address+'\')">'+sa(item.address)+'</span>':'&mdash;'},
   ];
   return rows.map(function(r){
     return'<div class="meta-row"><span class="meta-label">'+r.l+'</span><span class="meta-val" style="'+(r.rclr?'color:'+r.rclr+';':'')+'">'+r.v+'</span></div>';
   }).join('');
 }
 
-function cpID(){if(ST.sel&&navigator.clipboard)navigator.clipboard.writeText(ST.sel.id).then(function(){toast('Inscription ID copied!');});}
+function cpID(){if(ST.sel&&navigator.clipboard)navigator.clipboard.writeText(ST.sel.id).then(function(){toast('&#128203; ID copied!');});}
 
 function loadMeta(id){
   var btn=document.getElementById('load-btn');
-  if(btn){btn.innerHTML='<span class="spin-el">&circledot;</span>&nbsp;Loading&hellip;';btn.disabled=true;}
+  if(btn){btn.innerHTML='<span class="spin-el">&#9711;</span>&nbsp;Loading&hellip;';btn.disabled=true;}
   fetchOne(id).then(function(res){
     if(res.data){
       ST.sel=Object.assign({},ST.sel,res.data);
       var mb=document.getElementById('meta-box');
-      if(mb)mb.innerHTML='<div style="padding:10px 16px;border-bottom:1px solid #0e1a28"><div class="section-label" style="margin:0">Metadata &middot; via '+res.src+'</div></div>'+buildMeta(res.data);
-      toast('Metadata loaded via '+res.src);
-    }else{toast('Metadata unavailable &mdash; view on ordinals.com');}
+      if(mb)mb.innerHTML='<div style="padding:10px 16px;border-bottom:1px solid var(--border)"><div class="section-label" style="margin:0">&#128203; Metadata &middot; via '+res.src+'</div></div>'+buildMeta(res.data);
+      toast('&#10024; Metadata loaded via '+res.src);
+    }else{toast('&#128561; Unavailable &mdash; view on ordinals.com');}
     if(btn)btn.style.display='none';
   });
 }
@@ -1054,24 +1278,22 @@ function openAddr(addr){
       +'<button class="back-btn" onclick="renderHome()">'
         +'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Back'
       +'</button>'
-      +'<div class="surface" style="padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">'
-        +'<div style="width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#f7931a,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;color:#fff;flex-shrink:0">'+addr.slice(2,4).toUpperCase()+'</div>'
+      +'<div class="surface" style="padding:18px 20px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(135deg,rgba(247,147,26,0.05),rgba(255,107,255,0.05))">'
+        +'<div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#000;flex-shrink:0;box-shadow:0 0 20px rgba(247,147,26,0.4)">'+addr.slice(2,4).toUpperCase()+'</div>'
         +'<div style="flex:1;min-width:0">'
-          +'<div class="section-label" style="margin-bottom:4px">Bitcoin Address</div>'
-          +'<div style="font-size:13px;font-weight:700;color:#d8e0ea;word-break:break-all">'+addr+'</div>'
+          +'<div class="section-label" style="margin-bottom:4px">&#128273; Bitcoin Address</div>'
+          +'<div style="font-size:13px;font-weight:800;color:var(--text);word-break:break-all">'+addr+'</div>'
         +'</div>'
         +'<div style="display:flex;gap:7px;flex-wrap:wrap;flex-shrink:0">'
-          +'<button onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+addr+'\').then(function(){toast(\'Copied!\')})" class="btn-orange">Copy</button>'
+          +'<button onclick="navigator.clipboard&&navigator.clipboard.writeText(\''+addr+'\').then(function(){toast(\'&#128203; Copied!\')})" class="btn-orange">Copy</button>'
           +'<a href="'+ORD+'/address/'+addr+'" target="_blank" class="btn-ghost">ordinals.com &#8599;</a>'
         +'</div>'
       +'</div>'
-      +'<div id="addr-stats" class="stats-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px">'
-        +Array.from({length:4}).map(function(){return'<div class="sk" style="height:64px;border-radius:10px"></div>';}).join('')
-      +'</div>'
-      +'<div class="section-label">Inscriptions</div>'
+      +'<div id="addr-stats" class="stats-4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px">'+Array.from({length:4}).map(function(){return'<div class="sk" style="height:66px;border-radius:12px"></div>';}).join('')+'</div>'
+      +'<div class="section-label">&#128248; Inscriptions</div>'
       +'<div class="grid" id="addr-grid">'+skCards(12)+'</div>'
-      +'<div class="surface" style="padding:15px;margin-top:20px">'
-        +'<div class="section-label">Explore On</div>'
+      +'<div class="surface" style="padding:16px;margin-top:22px">'
+        +'<div class="section-label">&#127760; Explore On</div>'
         +'<div style="display:flex;flex-wrap:wrap;gap:7px">'
           +[{n:'ordinals.com',u:ORD+'/address/'+addr},{n:'Ordinals Wallet',u:'https://ordinalswallet.com/address/'+addr},{n:'Best in Slot',u:'https://bestinslot.xyz/ordinals/wallet/'+addr},{n:'UniSat',u:'https://unisat.io/address/'+addr},{n:'Ordiscan',u:'https://ordiscan.com/address/'+addr}]
           .map(function(l){return'<a href="'+l.u+'" target="_blank" class="mlink">'+l.n+' &#8599;</a>';}).join('')
@@ -1087,271 +1309,114 @@ function openAddr(addr){
     if(ast)ast.innerHTML=[{v:fn(res.r.length),l:'Inscriptions'},{v:fn(rare),l:'Rare Sats'},{v:fn(colls),l:'Collections'},{v:res.src,l:'Data Source'}]
       .map(function(s){return'<div class="stat-card"><div class="stat-val">'+s.v+'</div><div class="stat-label">'+s.l+'</div></div>';}).join('');
     var ag=document.getElementById('addr-grid');
-    if(ag)ag.innerHTML=res.r.length?res.r.map(function(item,i){return cardHTML(item,'openAux('+i+')',i*0.022);}).join(''):'<div class="no-results">No inscriptions found for this address</div>';
+    if(ag)ag.innerHTML=res.r.length?res.r.map(function(item,i){return cardHTML(item,'openAux('+i+')',i*0.022);}).join(''):'<div class="no-results">No inscriptions found</div>';
     if(res.extra&&res.extra.runes_balances&&res.extra.runes_balances.length){
-      if(ag)ag.innerHTML+='<div style="grid-column:1/-1;margin-top:20px"><div class="section-label">Rune Balances</div><div style="display:flex;flex-wrap:wrap;gap:8px">'+res.extra.runes_balances.map(function(r){return'<div class="surface" style="padding:10px 14px;display:flex;align-items:center;gap:8px"><span style="font-size:16px">'+(r[2]||'')+'</span><div><div style="font-size:12px;font-weight:700;color:#f7931a">'+fn(parseInt(r[1]))+'</div><div style="font-size:10px;color:#304055">'+r[0]+'</div></div></div>';}).join('')+'</div></div>';
+      if(ag)ag.innerHTML+='<div style="grid-column:1/-1;margin-top:20px"><div class="section-label">&#128081; Rune Balances</div><div style="display:flex;flex-wrap:wrap;gap:8px">'+res.extra.runes_balances.map(function(r){return'<div class="surface" style="padding:10px 14px;display:flex;align-items:center;gap:8px"><span style="font-size:16px">'+(r[2]||'')+'</span><div><div style="font-size:12px;font-weight:800;color:var(--accent)">'+fn(parseInt(r[1]))+'</div><div style="font-size:10px;color:var(--text3);font-weight:700">'+r[0]+'</div></div></div>';}).join('')+'</div></div>';
     }
   });
 }
 
 // ── COLLECTIONS ───────────────────────────────────────────────────────────────
-
-// ── COLLECTIONS DATA ENGINE ─────────────────────────────────────────────────
-// Priority: 1) collections.json (local backup)  2) BestInSlot live  3) hardcoded
-
-var COL_CACHE = [];        // all collections loaded in memory
-var COL_LOADED = false;    // have we loaded the full list yet?
-var COL_OFFSET = 0;        // BIS pagination offset
-var COL_HAS_MORE = true;   // more pages available on BIS
-var COL_LOADING = false;   // currently fetching
-var COL_SOURCE = null;     // where data came from
-
-// Load collections — tries local JSON first, then BIS live
-function loadCollections(onDone){
-  if(COL_LOADED && COL_CACHE.length){onDone(COL_CACHE);return;}
-
-  // Try local collections.json backup first
-  fetch('./collections.json').then(function(r){
-    if(!r.ok)throw new Error('no file');
-    return r.json();
-  }).then(function(d){
-    var list=d.collections||d;
-    if(!Array.isArray(list)||!list.length)throw new Error('empty');
-    COL_CACHE=list;COL_LOADED=true;COL_HAS_MORE=false;
-    COL_SOURCE='collections.json (local backup &middot; '+list.length.toLocaleString()+' collections)';
-    onDone(COL_CACHE);
-  }).catch(function(){
-    // No local file — fetch from BestInSlot live
-    COL_SOURCE='BestInSlot (live)';
-    fetchBISCollections(0,onDone);
-  });
-}
-
-// Fetch one page (100) from BestInSlot
-function fetchBISCollections(offset,onDone){
-  if(COL_LOADING)return;
-  COL_LOADING=true;
-  var url=BIS+'/collection/collections?sort_by=median_number&order=asc&offset='+offset+'&count=100';
-  apiFetch(url).then(function(d){
-    var items=d.data||[];
-    var normalized=items.map(normBISCol).filter(Boolean);
-    COL_CACHE=COL_CACHE.concat(normalized);
-    COL_OFFSET=offset+items.length;
-    COL_HAS_MORE=items.length>=100;
-    COL_LOADING=false;
-    if(onDone)onDone(COL_CACHE);
-  }).catch(function(){
-    COL_LOADING=false;
-    // Return whatever we have so far (or empty)
-    if(onDone)onDone(COL_CACHE);
-  });
-}
-
-// Load NEXT page from BestInSlot (for "Load More" button)
-function loadMoreBISCollections(onDone){
-  if(!COL_HAS_MORE||COL_LOADING){if(onDone)onDone([]);return;}
-  fetchBISCollections(COL_OFFSET,onDone);
-}
-
-// Normalize BestInSlot collection response
-function normBISCol(c){
-  if(!c||!c.slug)return null;
-  return{
-    slug:c.slug,
-    name:c.name||c.slug,
-    supply:parseInt(c.supply)||0,
-    min_number:c.min_number||0,
-    max_number:c.max_number||0,
-    median_number:c.median_number||0,
-    icon:c.icon_url||c.inscription_icon_id||'',
-    bis_url:c.bis_url||('https://bestinslot.xyz/ordinals/collection/'+(c.slug||'')),
-    floor_price:c.floor_price||null,
-    vol_24h:c.vol_24h_in_btc||null,
-    vol_7d:c.vol_7d_in_btc||null,
-    vol_total:c.vol_total_in_btc||null,
-    sale_cnt_total:c.sale_cnt_total||null,
-    listed:c.listed_count||null,
-  };
-}
-
-// Filter collections by search query
-function filterCollections(list,q){
-  if(!q)return list;
-  q=q.toLowerCase();
-  return list.filter(function(c){
-    return (c.name||'').toLowerCase().includes(q)||(c.slug||'').toLowerCase().includes(q);
-  });
-}
-
-// Format floor price from sats
-function fmtFloor(sats){
-  if(!sats)return'&mdash;';
-  var btc=(sats/100000000).toFixed(4);
-  return btc+' BTC';
-}
-function fmtVol(btc){
-  if(!btc)return'&mdash;';
-  return parseFloat(btc).toFixed(2)+' BTC';
-}
-
 function renderCollections(){
   setNav('collections');sbar(null,null);
   var pg=document.getElementById('pg');pg.className='fade';
   var colSearch='';
 
   function buildUI(list){
-    // Apply search filter
-    var filtered=filterCollections(list,colSearch);
-
+    var filtered=colSearch?list.filter(function(c){var q=colSearch.toLowerCase();return(c.name||'').toLowerCase().includes(q)||(c.slug||'').toLowerCase().includes(q);}):list;
     pg.innerHTML=
       '<div style="max-width:1060px;margin:0 auto;padding:24px 20px">'
-        // Header
         +'<div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px">'
           +'<div>'
-            +'<div style="font-size:19px;font-weight:800;color:#f7931a;letter-spacing:-.3px">Collections</div>'
-            +'<div style="font-size:11px;color:#304055;margin-top:3px" id="col-src">'
-              +(COL_SOURCE?'via '+COL_SOURCE:'Loading...')
-            +'</div>'
+            +'<div style="font-family:var(--font-display);font-size:32px;color:var(--accent2);letter-spacing:1px;text-shadow:0 0 20px rgba(255,107,255,0.4)">&#127912; Collections</div>'
+            +'<div style="font-size:11px;color:var(--text3);margin-top:4px;font-weight:700">'+(ST.COL_SOURCE?'via '+ST.COL_SOURCE:'Loading...')+'</div>'
           +'</div>'
           +'<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
-            // Stats
-            +'<div style="background:#0d1520;border:1px solid #141f2e;border-radius:8px;padding:6px 14px;font-size:11px;color:#5a7090">'
-              +'<span style="color:#f7931a;font-weight:700" id="col-count">'+filtered.length.toLocaleString()+'</span>'
-              +' / <span id="col-total">'+list.length.toLocaleString()+'</span> collections'
+            +'<div class="surface" style="padding:6px 14px;font-size:11px;color:var(--text2);font-weight:800">'
+              +'<span style="color:var(--accent2);font-weight:900">'+filtered.length.toLocaleString()+'</span>'
+              +' / '+list.length.toLocaleString()+' collections'
             +'</div>'
-            // Fetcher link
-            +'<a href="collection-fetcher.html" target="_blank" class="btn-ghost" style="font-size:11px;padding:6px 12px">&#x1F4E6; Open Fetcher</a>'
+            +'<a href="collection-fetcher.html" target="_blank" class="btn-ghost" style="font-size:11px">&#128230; Fetcher</a>'
           +'</div>'
         +'</div>'
-        // Search bar
-        +'<div style="display:flex;gap:8px;margin-bottom:16px">'
-          +'<div style="flex:1;display:flex;align-items:center;background:#0d1520;border:1px solid #141f2e;border-radius:8px;padding:0 12px;height:38px;gap:8px">'
-            +'<svg width="13" height="13" fill="none" stroke="#3a5068" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
-            +'<input id="col-search" placeholder="Search collections by name or slug..." '
-              +'style="background:none;border:none;color:#d8e0ea;font-size:13px;flex:1;outline:none;font-family:inherit" '
-              +'oninput="colSearch=this.value;buildUI(COL_CACHE)">'
+        +'<div style="display:flex;gap:8px;margin-bottom:18px">'
+          +'<div style="flex:1;display:flex;align-items:center;background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:0 12px;height:40px;gap:8px;transition:border-color .14s" onfocusin="this.style.borderColor=\'var(--accent2)\'" onfocusout="this.style.borderColor=\'var(--border)\'">'
+            +'<svg width="14" height="14" fill="none" stroke="var(--text3)" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>'
+            +'<input id="col-search" placeholder="Search by name or slug..." style="background:none;border:none;color:var(--text);font-size:13px;flex:1;outline:none;font-weight:700;font-family:var(--font-body)" oninput="colSearch=this.value;buildUI(ST.COL_CACHE)">'
           +'</div>'
-          +(COL_HAS_MORE
-            ?'<button onclick="loadMoreCols()" class="btn-ghost" id="load-more-cols" style="font-size:12px;white-space:nowrap">Load More +'+(COL_HAS_MORE?'100':'')+'</button>'
-            :'<span style="font-size:11px;color:#304055;padding:0 12px;align-self:center">All loaded</span>'
-          )
+          +(ST.COL_HAS_MORE?'<button onclick="loadMoreCols()" class="btn-ghost" style="font-size:12px;white-space:nowrap">More +100</button>':'')
         +'</div>'
-        // Grid
         +(filtered.length===0
-          ?'<div style="text-align:center;color:#304055;padding:60px;font-size:14px">No collections found matching "'+colSearch+'"</div>'
-          :'<div id="col-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:13px">'
-            +filtered.slice(0,COL_HAS_MORE?filtered.length:filtered.length).map(function(c,i){
-              return buildColCard(c,i,list);
-            }).join('')
+          ?'<div class="no-results">No collections matching &ldquo;'+colSearch+'&rdquo;</div>'
+          :'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">'
+            +filtered.map(function(c,i){return buildColCard(c,i);}).join('')
           +'</div>'
         )
-        // Load more if live BIS and has more
-        +(COL_HAS_MORE&&!colSearch
-          ?'<div style="text-align:center;margin-top:20px"><button class="load-more" id="lm-btn" onclick="loadMoreCols()">Load More Collections (+100)</button></div>'
-          :'')
-        // Attribution
-        +'<div style="margin-top:22px;padding:13px 16px;background:#0a1018;border:1px solid #141f2e;border-radius:10px;font-size:11px;color:#304055;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'
-          +'<span>&#x1F4C2;</span>'
-          +'<span>Data from <a href="https://bestinslot.xyz" target="_blank" style="color:#f7931a">BestInSlot</a> &middot; '
-            +'Source: <a href="https://github.com/ordinals-wallet/ordinals-collections" target="_blank" style="color:#f7931a">ordinals-wallet/ordinals-collections</a> &middot; '
-            +'<a href="collection-fetcher.html" target="_blank" style="color:#f7931a">Download backup &#x2B07;</a></span>'
+        +(ST.COL_HAS_MORE&&!colSearch?'<div style="text-align:center;margin-top:22px"><button class="load-more" onclick="loadMoreCols()">&#9660; Load More Collections (+100)</button></div>':'')
+        +'<div style="margin-top:22px;padding:13px 16px;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;font-size:11px;color:var(--text3);font-weight:700">'
+          +'&#128194; Data from <a href="https://bestinslot.xyz" target="_blank" style="color:var(--accent)">BestInSlot</a> &middot; '
+          +'Reference: <a href="https://github.com/ordinals-wallet/ordinals-collections" target="_blank" style="color:var(--accent)">ordinals-wallet/ordinals-collections</a> &middot; '
+          +'<a href="collection-fetcher.html" target="_blank" style="color:var(--accent2)">Download backup &#8595;</a>'
         +'</div>'
       +'</div>';
   }
 
-  function buildColCard(c,i,fullList){
+  function buildColCard(c,i){
+    var accent=accentFromSlug(c.slug);
     var hasIcon=c.icon&&c.icon.length>4;
-    var hasFloor=c.floor_price!=null;
-    var hasVol=c.vol_total!=null;
     var inscRange=c.min_number?('#'+fn(c.min_number)+(c.max_number&&c.max_number!==c.min_number?' &rarr; #'+fn(c.max_number):'')):'';
-    // Pick a deterministic accent color based on slug hash
-    var colors=['#f7931a','#10b981','#3b82f6','#8b5cf6','#ef4444','#f59e0b','#ec4899','#06b6d4','#84cc16','#f97316'];
-    var h=0;for(var k=0;k<(c.slug||'').length;k++)h=(h*31+c.slug.charCodeAt(k))&0xfffffff;
-    var accent=colors[h%colors.length];
-    var idx=fullList.indexOf(c);
-
-    return '<div class="card" onclick="openCollection(''+c.slug+'',''+c.name+'')" style="padding:0;overflow:hidden;animation:fadeUp .22s ease '+(Math.min(i,20)*0.025).toFixed(2)+'s both">'
-      // Icon / color header bar
-      +'<div style="height:5px;background:'+accent+'"></div>'
+    return'<div class="col-card fade" onclick="openCollection(\''+c.slug+'\',\''+c.name+'\')" style="animation-delay:'+(Math.min(i,20)*0.025).toFixed(2)+'s">'
+      +'<div style="height:4px;background:linear-gradient(90deg,'+accent+',transparent)"></div>'
       +'<div style="padding:14px 14px 0">'
         +'<div style="display:flex;align-items:center;gap:11px;margin-bottom:10px">'
-          // Icon
-          +'<div style="width:44px;height:44px;border-radius:9px;background:#050810;border:1px solid #141f2e;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center">'
+          +'<div style="width:46px;height:46px;border-radius:10px;background:var(--bg);border:1.5px solid var(--border);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px '+accent+'22">'
             +(hasIcon
-              ?'<img src="'+c.icon+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML='<div style=&quot;font-size:18px&quot;>&#x1F539;</div>'">'
+              ?'<img src="'+c.icon+'" style="width:100%;height:100%;object-fit:cover" onerror="this.parentNode.innerHTML=\'<div style=&quot;font-size:20px&quot;>&#128142;</div>\'">'
               :'<iframe src="'+ORD+'/preview/'+SEEDS[i%SEEDS.length]+'" sandbox="allow-scripts allow-same-origin" loading="lazy" style="width:100%;height:100%;pointer-events:none" title="'+c.name+'"></iframe>')
           +'</div>'
           +'<div style="flex:1;min-width:0">'
-            +'<div style="font-size:13px;font-weight:800;color:#d8e0ea;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c.name+'</div>'
-            +'<div style="font-size:10px;color:#3a5068;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c.slug+'</div>'
+            +'<div style="font-size:13px;font-weight:900;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+c.name+'</div>'
+            +'<div style="font-size:10px;color:var(--text3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700">'+c.slug+'</div>'
           +'</div>'
         +'</div>'
-        // Stats row
         +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">'
-          +'<div style="background:#060b12;border-radius:6px;padding:6px 9px">'
-            +'<div style="font-size:9px;color:#304055;font-weight:700;letter-spacing:.5px">SUPPLY</div>'
-            +'<div style="font-size:12px;font-weight:700;color:'+accent+'">'+fn(c.supply||0)+'</div>'
-          +'</div>'
-          +'<div style="background:#060b12;border-radius:6px;padding:6px 9px">'
-            +'<div style="font-size:9px;color:#304055;font-weight:700;letter-spacing:.5px">FLOOR</div>'
-            +'<div style="font-size:12px;font-weight:700;color:#d8e0ea">'+fmtFloor(c.floor_price)+'</div>'
-          +'</div>'
-          +'<div style="background:#060b12;border-radius:6px;padding:6px 9px">'
-            +'<div style="font-size:9px;color:#304055;font-weight:700;letter-spacing:.5px">VOL TOTAL</div>'
-            +'<div style="font-size:12px;font-weight:700;color:#d8e0ea">'+fmtVol(c.vol_total)+'</div>'
-          +'</div>'
-          +'<div style="background:#060b12;border-radius:6px;padding:6px 9px">'
-            +'<div style="font-size:9px;color:#304055;font-weight:700;letter-spacing:.5px">SALES</div>'
-            +'<div style="font-size:12px;font-weight:700;color:#d8e0ea">'+fn(c.sale_cnt_total)+'</div>'
-          +'</div>'
+          +'<div style="background:var(--bg);border-radius:7px;padding:6px 9px"><div style="font-size:9px;color:var(--text3);font-weight:900;letter-spacing:.5px">SUPPLY</div><div style="font-size:12px;font-weight:900;color:'+accent+'">'+fn(c.supply||0)+'</div></div>'
+          +'<div style="background:var(--bg);border-radius:7px;padding:6px 9px"><div style="font-size:9px;color:var(--text3);font-weight:900;letter-spacing:.5px">FLOOR</div><div style="font-size:12px;font-weight:900;color:var(--text)">'+fmtFloor(c.floor_price)+'</div></div>'
+          +'<div style="background:var(--bg);border-radius:7px;padding:6px 9px"><div style="font-size:9px;color:var(--text3);font-weight:900;letter-spacing:.5px">VOL TOTAL</div><div style="font-size:12px;font-weight:900;color:var(--text)">'+fmtVol(c.vol_total)+'</div></div>'
+          +'<div style="background:var(--bg);border-radius:7px;padding:6px 9px"><div style="font-size:9px;color:var(--text3);font-weight:900;letter-spacing:.5px">SALES</div><div style="font-size:12px;font-weight:900;color:var(--text)">'+fn(c.sale_cnt_total)+'</div></div>'
         +'</div>'
       +'</div>'
-      // Inscription range footer
-      +(inscRange?'<div style="padding:7px 14px;border-top:1px solid #0e1a28;font-size:9px;color:#3a5068;display:flex;justify-content:space-between;align-items:center">'
-        +'<span>'+inscRange+'</span>'
-        +'<a href="'+c.bis_url+'" target="_blank" onclick="event.stopPropagation()" style="color:#304055;font-size:10px;font-weight:600;text-decoration:none">BIS &#x2197;</a>'
-        +'</div>':'')
+      +(inscRange?'<div style="padding:7px 14px;border-top:1px solid var(--border);font-size:9px;color:var(--text3);display:flex;justify-content:space-between;align-items:center;font-weight:700"><span>'+inscRange+'</span><a href="'+c.bis_url+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--text3);font-weight:800;text-decoration:none;font-size:10px">BIS &#8599;</a></div>':'')
     +'</div>';
   }
 
-  // Initial load
-  var loading_html='<div style="max-width:1060px;margin:0 auto;padding:24px 20px">'
-    +'<div style="font-size:19px;font-weight:800;color:#f7931a;margin-bottom:20px">Collections</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:13px">'
-    +Array.from({length:24}).map(function(){return'<div style="background:#0d1520;border:1px solid #141f2e;border-radius:12px;height:180px" class="sk"></div>';}).join('')
+  pg.innerHTML='<div style="max-width:1060px;margin:0 auto;padding:24px 20px">'
+    +'<div style="font-family:var(--font-display);font-size:32px;color:var(--accent2);letter-spacing:1px;margin-bottom:22px;text-shadow:0 0 20px rgba(255,107,255,0.4)">&#127912; Collections</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px">'
+    +Array.from({length:24}).map(function(){return'<div class="sk" style="height:190px;border-radius:14px"></div>';}).join('')
     +'</div></div>';
-  pg.innerHTML=loading_html;
 
   loadCollections(function(list){
-    sbar(COL_SOURCE&&COL_SOURCE.includes('json')?null:COL_SOURCE, null);
+    sbar(ST.COL_SOURCE&&ST.COL_SOURCE.includes('json')?null:ST.COL_SOURCE,null);
     buildUI(list);
   });
 }
 
-function loadMoreCols(){
-  var btn=document.getElementById('lm-btn')||document.getElementById('load-more-cols');
-  if(btn){btn.textContent='Loading...';btn.disabled=true;}
-  loadMoreBISCollections(function(){
-    renderCollections();
-  });
-}
-
-
-
 function openCollection(slug,name){
-  if(!slug){toast('Collection slug not available');return;}
+  if(!slug){toast('&#128561; Collection slug not available');return;}
   setNav(null);sbar(null,null);
   var pg=document.getElementById('pg');pg.className='fade';
+  var accent=accentFromSlug(slug);
   pg.innerHTML=
     '<div style="max-width:1060px;margin:0 auto;padding:24px 20px">'
       +'<button class="back-btn" onclick="renderCollections()">'
         +'<svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>Collections'
       +'</button>'
-      +'<div style="font-size:19px;font-weight:800;color:#f7931a;margin-bottom:5px">'+name+'</div>'
-      +'<div style="font-size:11px;color:#304055;margin-bottom:18px">Fetching via BestInSlot &middot; slug: '+slug+'</div>'
+      +'<div style="font-family:var(--font-display);font-size:28px;color:'+accent+';letter-spacing:1px;margin-bottom:5px;text-shadow:0 0 16px '+accent+'44">'+name+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-bottom:18px;font-weight:700">Fetching via BestInSlot &middot; slug: '+slug+'</div>'
       +'<div class="grid" id="col-grid">'+skCards(12)+'</div>'
     +'</div>';
-  fetchCollection(slug).then(function(res){
+  fetchCollectionItems(slug).then(function(res){
     ST.aux=res.r;sbar(res.src,null);
     var cg=document.getElementById('col-grid');
     if(cg)cg.innerHTML=res.r.length
@@ -1360,37 +1425,44 @@ function openCollection(slug,name){
   });
 }
 
+function loadMoreCols(){
+  loadMoreBISCols(function(){renderCollections();});
+}
+
 // ── RUNES ─────────────────────────────────────────────────────────────────────
 function renderRunes(){
   setNav('runes');sbar(null,null);
   var pg=document.getElementById('pg');pg.className='fade';
   pg.innerHTML=
     '<div style="max-width:1060px;margin:0 auto;padding:24px 20px">'
-      +'<div style="font-size:19px;font-weight:800;color:#f7931a;letter-spacing:-.3px;margin-bottom:5px">Runes</div>'
-      +'<div style="font-size:11px;color:#304055;margin-bottom:22px">Bitcoin fungible tokens &middot; Launched at Halving #4 (Block 840,000)</div>'
+      +'<div style="font-family:var(--font-display);font-size:32px;color:var(--accent3);letter-spacing:1px;margin-bottom:5px;text-shadow:0 0 20px rgba(0,245,255,0.4)">&#128081; Runes</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-bottom:22px;font-weight:700">Bitcoin fungible tokens &middot; Launched at Halving #4 Block 840,000</div>'
       +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:13px" id="rune-grid">'
-        +Array.from({length:12}).map(function(){return'<div class="sk" style="height:90px;border-radius:10px"></div>';}).join('')
+        +Array.from({length:12}).map(function(){return'<div class="sk" style="height:90px;border-radius:12px"></div>';}).join('')
       +'</div>'
     +'</div>';
   apiFetch(PROXY+'/runes').then(function(d){
     sbar('ordinals.com',null);
     var rg=document.getElementById('rune-grid');if(!rg)return;
     var entries=d.entries||[];
-    if(!entries.length){rg.innerHTML='<div class="no-results">No runes data via proxy.<br><br><a href="'+ORD+'/runes" target="_blank">View on ordinals.com &#8599;</a></div>';return;}
+    if(!entries.length){rg.innerHTML='<div class="no-results">Runes unavailable via proxy.<br><br><a href="'+ORD+'/runes" target="_blank">View on ordinals.com &#8599;</a></div>';return;}
     rg.innerHTML=entries.map(function(e,i){
       var rune=e[0]||'';var info=e[1]||{};var sym=info.symbol||'\u29bf';
-      return'<div class="surface" style="padding:14px 16px;cursor:pointer;transition:border-color .14s" onmouseover="this.style.borderColor=\'rgba(247,147,26,.35)\'" onmouseout="this.style.borderColor=\'#141f2e\'" onclick="window.open(\''+ORD+'/rune/'+encodeURIComponent(rune)+'\',\'_blank\')" style="animation:fadeUp .28s ease '+(i*.04)+'s both">'
+      var accent=accentFromSlug(rune);
+      return'<div class="rune-card fade" style="animation-delay:'+(i*0.04).toFixed(2)+'s" onclick="window.open(\''+ORD+'/rune/'+encodeURIComponent(rune)+'\',\'_blank\')">'
         +'<div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">'
-          +'<div style="width:38px;height:38px;border-radius:8px;background:rgba(247,147,26,.1);border:1px solid rgba(247,147,26,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">'+sym+'</div>'
-          +'<div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:700;color:#d8e0ea;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+rune+'</div>'
-          +'<div style="font-size:10px;color:#304055;margin-top:2px">Supply: '+fn(parseInt(info.supply||0))+'</div></div>'
+          +'<div style="width:40px;height:40px;border-radius:10px;background:'+accent+'22;border:1.5px solid '+accent+'44;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;box-shadow:0 0 10px '+accent+'22">'+sym+'</div>'
+          +'<div style="flex:1;min-width:0">'
+            +'<div style="font-size:12px;font-weight:900;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+rune+'</div>'
+            +'<div style="font-size:10px;color:var(--text3);margin-top:2px;font-weight:700">Supply: '+fn(parseInt(info.supply||0))+'</div>'
+          +'</div>'
         +'</div>'
-        +'<a href="'+ORD+'/rune/'+encodeURIComponent(rune)+'" target="_blank" class="mlink" onclick="event.stopPropagation()">View on ordinals.com &#8599;</a>'
+        +'<a href="'+ORD+'/rune/'+encodeURIComponent(rune)+'" target="_blank" class="mlink" onclick="event.stopPropagation()" style="font-size:10px">View &#8599;</a>'
       +'</div>';
     }).join('');
   }).catch(function(){
     var rg=document.getElementById('rune-grid');
-    if(rg)rg.innerHTML='<div class="no-results">Runes data unavailable via proxy.<br><br><a href="'+ORD+'/runes" target="_blank">View on ordinals.com &#8599;</a></div>';
+    if(rg)rg.innerHTML='<div class="no-results">Runes unavailable via proxy.<br><br><a href="'+ORD+'/runes" target="_blank">View on ordinals.com &#8599;</a></div>';
   });
 }
 
@@ -1400,13 +1472,279 @@ function renderBlocks(){
   var pg=document.getElementById('pg');pg.className='fade';
   pg.innerHTML=
     '<div style="max-width:820px;margin:0 auto;padding:24px 20px">'
-      +'<div style="font-size:19px;font-weight:800;color:#f7931a;letter-spacing:-.3px;margin-bottom:5px">Block Explorer</div>'
-      +'<div style="font-size:11px;color:#304055;margin-bottom:20px">Explore inscriptions by Bitcoin block height &middot; Current tip ~Block 949,146</div>'
+      +'<div style="font-family:var(--font-display);font-size:32px;color:var(--accent4);letter-spacing:1px;margin-bottom:5px;text-shadow:0 0 20px rgba(57,255,20,0.4)">&#129667; Block Explorer</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-bottom:20px;font-weight:700">Browse inscriptions by Bitcoin block height &middot; Tip ~Block 949,146</div>'
       +'<div style="display:flex;gap:9px;margin-bottom:20px">'
-        +'<input id="blk-in" placeholder="Enter block height (e.g. 949146)" style="flex:1;background:#0d1520;border:1px solid #141f2e;border-radius:8px;padding:10px 14px;color:#d8e0ea;font-size:13px;outline:none;font-family:inherit;transition:border-color .14s" onfocus="this.style.borderColor=\'rgba(247,147,26,.4)\'" onblur="this.style.borderColor=\'#141f2e\'" onkeydown="if(event.key===\'Enter\')lookupBlk()">'
-        +'<button onclick="lookupBlk()" class="btn-primary">Go</button>'
+        +'<input id="blk-in" placeholder="Enter block height e.g. 949146" style="flex:1;background:var(--card);border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;outline:none;font-family:var(--font-body);font-weight:700;transition:border-color .14s" onfocus="this.style.borderColor=\'var(--accent4)\'" onblur="this.style.borderColor=\'var(--border2)\'" onkeydown="if(event.key===\'Enter\')lookupBlk()">'
+        +'<button onclick="lookupBlk()" class="btn-primary" style="background:linear-gradient(135deg,var(--accent4),#00cc00)">Go &#9658;</button>'
       +'</div>'
-      +'<div class="section-label">Notable Blocks</div>'
-      +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px">'
-        +[{b:949146,l:'Today'},{b:840000,l:'Halving #4'},{b:826000,l:'Runes Alpha'},{b:767430,l:'1st Inscription'},{b:820000,l:'10M Inscriptions'},{b:888888,l:'Block 888,888'},{b:778921,l:'1st Recursive'},{b:809478,l:'BRC-20 Launch'},{b:767753,l:'First 100'}]
-        .map(function(bb){return'<button onclick="lookupBlkNum('+bb.b+')" class="btn-ghost" style="flex-d
+      +'<div class="section-label">&#9889; Notable Blocks</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px">'
+        +[{b:949146,l:'Today'},{b:840000,l:'Halving #4'},{b:826000,l:'Runes Alpha'},{b:767430,l:'1st Inscription'},{b:820000,l:'10M Inscriptions'},{b:888888,l:'Lucky 888,888'},{b:778921,l:'1st Recursive'},{b:809478,l:'BRC-20 Launch'},{b:767753,l:'First 100'}]
+        .map(function(bb){
+          return'<button onclick="lookupBlkNum('+bb.b+')" class="btn-ghost" style="flex-direction:column;gap:2px;text-align:center">'
+            +'<span style="font-weight:900;color:var(--text);font-size:12px">'+fn(bb.b)+'</span>'
+            +'<span style="font-size:9px;color:var(--text3);font-weight:800">'+bb.l+'</span>'
+          +'</button>';
+        }).join('')
+      +'</div>'
+      +'<div id="blk-res"></div>'
+    +'</div>';
+}
+
+function lookupBlk(){var v=document.getElementById('blk-in');if(v&&v.value.trim()&&!isNaN(v.value.trim()))lookupBlkNum(parseInt(v.value.trim()));}
+function lookupBlkNum(h){
+  var br=document.getElementById('blk-res');if(!br)return;
+  br.innerHTML='<div style="text-align:center;color:var(--text3);padding:24px;font-size:28px"><span class="spin-el">&#9711;</span></div>';
+  fetchBlock(h).then(function(res){
+    sbar(res.src,null);
+    if(!res.r.length){
+      br.innerHTML='<div class="no-results">No inscriptions in block '+fn(h)+'<br><br><a href="'+ORD+'/block/'+h+'" target="_blank">View on ordinals.com &#8599;</a></div>';
+      if(res.blockData){var bd=res.blockData;br.innerHTML+='<div class="surface" style="padding:16px;margin-top:16px"><div class="section-label">&#129667; Block Info</div>'+[{l:'Height',v:fn(h)},{l:'Hash',v:'<span style="font-size:10px;word-break:break-all;color:var(--text2)">'+(bd.hash||'&mdash;')+'</span>'},{l:'Transactions',v:fn(bd.transactions?bd.transactions.length:null)},{l:'Runes',v:fn(bd.runes?bd.runes.length:0)}].map(function(r){return'<div class="meta-row"><span class="meta-label">'+r.l+'</span><span class="meta-val">'+r.v+'</span></div>';}).join('')+'</div>';}
+      return;
+    }
+    ST.aux=res.r;
+    br.innerHTML='<div class="section-label">'+fn(res.r.length)+' inscriptions in block '+fn(h)+' &middot; via '+(res.src||'API')+'</div>'
+      +'<div class="grid">'+res.r.map(function(item,i){return cardHTML(item,'openAux('+i+')',i*0.025);}).join('')+'</div>';
+  });
+}
+
+// ── SATS ──────────────────────────────────────────────────────────────────────
+function renderSats(){
+  setNav('sats');sbar(null,null);
+  var pg=document.getElementById('pg');pg.className='fade';
+  pg.innerHTML=
+    '<div style="max-width:820px;margin:0 auto;padding:24px 20px">'
+      +'<div style="font-family:var(--font-display);font-size:32px;color:#fbbf24;letter-spacing:1px;margin-bottom:5px;text-shadow:0 0 20px rgba(251,191,36,0.4)">&#10024; Sat Explorer</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-bottom:20px;font-weight:700">Look up any satoshi &middot; Rarity: common &rarr; uncommon &rarr; rare &rarr; epic &rarr; legendary &rarr; mythic</div>'
+      +'<div style="display:flex;gap:9px;margin-bottom:20px">'
+        +'<input id="sat-in" placeholder="Enter sat number e.g. 1000000000" style="flex:1;background:var(--card);border:1.5px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;outline:none;font-family:var(--font-body);font-weight:700;transition:border-color .14s" onfocus="this.style.borderColor=\'#fbbf24\'" onblur="this.style.borderColor=\'var(--border2)\'" onkeydown="if(event.key===\'Enter\')lookupSatEl()">'
+        +'<button onclick="lookupSatEl()" class="btn-primary" style="background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#000">Go &#10024;</button>'
+      +'</div>'
+      +'<div class="section-label">&#128142; Notable Sats</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px">'
+        +[{s:'0',l:'Sat Zero'},{s:'1',l:'Sat One'},{s:'1000000000',l:'Block 5 Sat'},{s:'1457808000000000',l:'First Uncommon'},{s:'2099994106992659',l:'Last Sat'},{s:'50000000000',l:'Block 1 First'}]
+        .map(function(ss){return'<button onclick="lookupSat(\''+ss.s+'\')" class="btn-ghost" style="flex-direction:column;gap:2px"><span style="font-weight:900;font-size:11px">'+ss.s+'</span><span style="font-size:9px;color:var(--text3)">'+ss.l+'</span></button>';}).join('')
+      +'</div>'
+      +'<div id="sat-res"></div>'
+    +'</div>';
+}
+function lookupSatEl(){var v=document.getElementById('sat-in');if(v&&v.value.trim())lookupSat(v.value.trim());}
+function lookupSat(sat){
+  var sr=document.getElementById('sat-res');
+  if(!sr){setNav('sats');renderSats();setTimeout(function(){lookupSat(sat);},200);return;}
+  sr.innerHTML='<div style="text-align:center;color:var(--text3);padding:24px;font-size:28px"><span class="spin-el">&#9711;</span></div>';
+  fetchSat(sat).then(function(res){
+    sbar(res.src,null);
+    if(!res.data){sr.innerHTML='<div class="no-results">Sat not found.<br><br><a href="'+ORD+'/sat/'+sat+'" target="_blank">View on ordinals.com &#8599;</a></div>';return;}
+    var d=res.data;
+    var rclr=rc(d.rarity)||'var(--text2)';
+    sr.innerHTML='<div class="surface" style="margin-bottom:16px">'
+      +'<div style="padding:10px 16px;border-bottom:1px solid var(--border)"><div class="section-label" style="margin:0">Sat #'+fn(parseInt(sat))+' &middot; via '+res.src+'</div></div>'
+      +[{l:'Sat Number',v:fn(d.number||sat)},{l:'Decimal',v:d.decimal||'&mdash;'},{l:'Degree',v:d.degree||'&mdash;'},{l:'Name',v:d.name||'&mdash;'},{l:'Block Height',v:fn(d.height)},{l:'Cycle',v:fn(d.cycle)},{l:'Epoch',v:fn(d.epoch)},{l:'Period',v:fn(d.period)},{l:'Offset',v:fn(d.offset)},{l:'Rarity',v:'<span style="color:'+rclr+';font-weight:900;font-family:var(--font-display);font-size:14px;letter-spacing:.5px">'+(d.rarity||'common').toUpperCase()+'</span>'},{l:'Timestamp',v:d.timestamp?new Date(d.timestamp*1000).toUTCString():'&mdash;'},{l:'Inscriptions',v:fn(d.inscriptions?d.inscriptions.length:0)}]
+      .map(function(r){return'<div class="meta-row"><span class="meta-label">'+r.l+'</span><span class="meta-val">'+r.v+'</span></div>';}).join('')+'</div>';
+    if(d.inscriptions&&d.inscriptions.length){
+      ST.aux=d.inscriptions.map(function(id){return{id:id,number:0,content_type:'',content_length:0,genesis_block_height:0,genesis_timestamp:null,sat_rarity:d.rarity||'common',sat_name:d.name||'',address:'',value:0,collection_name:'',collection_slug:'',title:'',parent:'',children:[],preview:ORD+'/preview/'+id,content:ORD+'/content/'+id,genesis_tx:''};});
+      sr.innerHTML+='<div class="section-label">Inscriptions on Sat #'+fn(parseInt(sat))+'</div><div class="grid">'+ST.aux.map(function(item,i){return cardHTML(item,'openAux('+i+')',i*0.05);}).join('')+'</div>';
+    }
+  });
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function renderStats(){
+  setNav('stats');sbar(null,null);
+  var pg=document.getElementById('pg');pg.className='fade';
+  pg.innerHTML=
+    '<div style="max-width:820px;margin:0 auto;padding:24px 20px">'
+      +'<div style="font-family:var(--font-display);font-size:32px;color:var(--accent);letter-spacing:1px;margin-bottom:5px;text-shadow:0 0 20px rgba(247,147,26,0.4)">&#128202; Stats &amp; Architecture</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-bottom:22px;font-weight:700">How Bitcoin Ordinals data flows to this explorer</div>'
+      +'<div id="sc" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px">'+Array.from({length:6}).map(function(){return'<div class="sk" style="height:80px;border-radius:12px"></div>';}).join('')+'</div>'
+      +'<div class="surface" style="padding:20px;margin-bottom:14px">'
+        +'<div class="section-label">&#128246; Data Pipeline</div>'
+        +[{n:'Bitcoin Blockchain',c:'var(--accent)',d:'Inscriptions embedded in Bitcoin tapscript witness data. Permanent and immutable on-chain forever.'},
+          {n:'ord Node (Rust)',c:'var(--accent)',d:'Casey Rodarmor\'s official indexer. Scans every block, extracts inscriptions. ordinals.com runs this.'},
+          {n:'ordinals.com JSON API',c:' var(--accent3)',d:'With Accept:application/json header, returns structured data. /inscriptions, /inscription/{id}, /address, /block, /sat, /runes.'},
+          {n:'Cloudflare Worker Proxy',c:'var(--accent4)',d:'proxy-worker.js adds the Accept header + CORS headers. Deploy free on Cloudflare Workers.'},
+          {n:'BestInSlot (Fallback)',c:'var(--accent4)',d:'api.bestinslot.xyz/v3 — rich metadata, bitmap index, collection data, wallet inscriptions.'},
+          {n:'Ordiscan (2nd Fallback)',c:'var(--text2)',d:'api.ordiscan.com/v1 — independent indexer, secondary fallback if BestInSlot unavailable.'},
+          {n:'Seed Data (Last Resort)',c:'var(--text3)',d:'24 real IDs from block 949,146. Iframes still render via ordinals.com/preview/ even offline.'}]
+        .map(function(s,i){
+          return'<div class="pipe-step">'
+            +'<div class="pipe-num" style="background:'+s.c+'22;border:1.5px solid '+s.c+'55;color:'+s.c+'">'+(i+1)+'</div>'
+            +'<div><div style="font-size:12px;font-weight:900;color:var(--text);margin-bottom:3px">'+s.n+'</div>'
+            +'<div style="font-size:11px;color:var(--text2);line-height:1.5;font-weight:700">'+s.d+'</div></div>'
+          +'</div>';
+        }).join('')
+      +'</div>'
+      +'<div class="surface" style="padding:20px">'
+        +'<div class="section-label">&#128994; API Status</div>'
+        +[{n:'ordinals.com',dot:'var(--accent)',s:'Partial',note:'preview+content always free &middot; JSON via proxy'},
+          {n:'Cloudflare Proxy',dot:'var(--accent4)',s:'Deploy',note:'proxy-worker.js &middot; unlocks full JSON API'},
+          {n:'BestInSlot',dot:'var(--accent4)',s:'Live',note:'api.bestinslot.xyz/v3 &middot; primary fallback'},
+          {n:'Ordiscan',dot:'var(--accent4)',s:'Live',note:'api.ordiscan.com/v1 &middot; secondary fallback'},
+          {n:'Wallet APIs',dot:'var(--accent4)',s:'Live',note:'Xverse / UniSat / OKX native &middot; no CORS'},
+          {n:'Hiro Ordinals',dot:'#ef4444',s:'Dead',note:'Shut down permanently March 9, 2026'}]
+        .map(function(a){
+          return'<div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:11px">'
+            +'<div style="width:8px;height:8px;border-radius:50%;background:'+a.dot+';flex-shrink:0;box-shadow:0 0 6px '+a.dot+'88"></div>'
+            +'<div style="font-weight:800;color:var(--text);width:140px;flex-shrink:0">'+a.n+'</div>'
+            +'<div style="color:var(--text2);width:65px;flex-shrink:0;font-size:10px;font-weight:800">'+a.s+'</div>'
+            +'<div style="color:var(--text3);font-size:10px;font-weight:700">'+a.note+'</div>'
+          +'</div>';
+        }).join('')
+      +'</div>'
+    +'</div>';
+
+  apiFetch(BIS+'/inscription/all?offset=0&count=1&sort_by=inscr_num&order=desc').then(function(d){
+    var top=nBIS((d.data||[])[0]);
+    apiFetch(PROXY+'/blockheight').then(function(h){if(typeof h==='number')ST.blockH=h;}).catch(function(){});
+    var sc=document.getElementById('sc');
+    if(sc)sc.innerHTML=[
+      {v:top?fn(top.number):'126M+',l:'Total Inscriptions'},
+      {v:'Block ~'+fn(ST.blockH),l:'Current Block'},
+      {v:top?ago(top.genesis_timestamp):'&mdash;',l:'Last Inscription'},
+      {v:String(CONTENT_TYPES.length),l:'Content Types'},
+      {v:'3 Wallets',l:'Xverse &middot; UniSat &middot; OKX'},
+      {v:'Mar 9, 2026',l:'Hiro Shutdown'},
+    ].map(function(c){return'<div class="stat-card"><div class="stat-val">'+c.v+'</div><div class="stat-label">'+c.l+'</div></div>';}).join('');
+  }).catch(function(){
+    var sc=document.getElementById('sc');
+    if(sc)sc.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--text3);padding:20px;font-size:12px;font-weight:700">Live stats unavailable.</div>';
+  });
+}
+
+// ── WALLET ────────────────────────────────────────────────────────────────────
+function openWallet(){
+  var modal=document.getElementById('modal');
+  modal.style.display='flex';
+  modal.innerHTML=
+    '<div class="modal-box" style="width:380px">'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">'
+        +'<div>'
+          +'<div style="font-family:var(--font-display);font-size:24px;color:var(--accent);letter-spacing:1px">&#128273; Connect Wallet</div>'
+          +'<div style="font-size:11px;color:var(--text3);margin-top:3px;font-weight:700">View your Bitcoin inscriptions</div>'
+        +'</div>'
+        +'<button onclick="closeModal()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;padding:0;transition:color .13s" onmouseover="this.style.color=\'var(--accent)\'" onmouseout="this.style.color=\'var(--text2)\'">&#10005;</button>'
+      +'</div>'
+      +[{e:'&#128309;',l:'Xverse',    s:'Recommended &middot; SatsConnect',fn:'cXverse()'},
+        {e:'&#9889;',  l:'UniSat',    s:'Popular &middot; Bitcoin native',  fn:'cUnisat()'},
+        {e:'&#9632;',  l:'OKX Wallet',s:'Web3 &middot; Multi-chain',        fn:'cOKX()'}]
+      .map(function(w){
+        return'<button class="wbtn" onclick="'+w.fn+'">'
+          +'<div style="width:40px;height:40px;border-radius:11px;background:var(--bg);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">'+w.e+'</div>'
+          +'<div style="flex:1;text-align:left">'
+            +'<div style="font-weight:800;color:var(--text)">'+w.l+'</div>'
+            +'<div style="font-size:10px;color:var(--text3);margin-top:2px;font-weight:700">'+w.s+'</div>'
+          +'</div>'
+          +'<span style="color:var(--text3);font-size:16px">&rarr;</span>'
+        +'</button>';
+      }).join('')
+      +'<div style="font-size:10px;color:var(--text3);text-align:center;margin-top:8px;font-weight:700">Non-custodial &middot; your keys never leave your wallet</div>'
+    +'</div>';
+}
+function closeModal(){var m=document.getElementById('modal');if(m){m.style.display='none';m.innerHTML='';}}
+
+function cXverse(){
+  toast('&#128309; Connecting Xverse\u2026');closeModal();
+  setTimeout(function(){
+    try{
+      var sc=window.SatsConnect;
+      if(sc&&sc.getAddress){
+        sc.getAddress({
+          payload:{purposes:['ordinals','payment'],message:'Connect to OrdXYZ',network:{type:'Mainnet'}},
+          onFinish:function(r){
+            var addrs=(r&&r.addresses)||[];
+            var a=null;
+            for(var i=0;i<addrs.length;i++){if(addrs[i].purpose==='ordinals'){a=addrs[i];break;}}
+            if(!a&&addrs.length)a=addrs[0];
+            if(a&&a.address)setWallet('xverse',a.address);
+            else toast('&#128561; Xverse: no address returned');
+          },
+          onCancel:function(){toast('Xverse: cancelled');}
+        });return;
+      }
+      if(window.XverseProviders&&window.XverseProviders.BitcoinProvider){
+        window.XverseProviders.BitcoinProvider.request('wallet_connect',null)
+          .then(function(res){var a=res&&res.result&&res.result.addresses&&res.result.addresses[0];if(a)setWallet('xverse',a.address);else toast('&#128561; Xverse: no address');})
+          .catch(function(e){toast('Xverse: '+e.message);});return;
+      }
+      toast('Xverse not installed');
+      setTimeout(function(){window.open('https://www.xverse.app/download','_blank');},600);
+    }catch(e){toast('Xverse: '+e.message);}
+  },200);
+}
+function cUnisat(){
+  toast('&#9889; Connecting UniSat\u2026');closeModal();
+  setTimeout(function(){
+    if(!window.unisat){toast('UniSat not installed');setTimeout(function(){window.open('https://unisat.io/download','_blank');},600);return;}
+    window.unisat.requestAccounts()
+      .then(function(a){if(a&&a[0])setWallet('unisat',a[0]);else toast('&#128561; UniSat: no accounts');})
+      .catch(function(e){toast('UniSat: '+e.message);});
+  },200);
+}
+function cOKX(){
+  toast('&#9632; Connecting OKX\u2026');closeModal();
+  setTimeout(function(){
+    var okx=window.okxwallet&&window.okxwallet.bitcoin;
+    if(!okx){toast('OKX not installed');setTimeout(function(){window.open('https://www.okx.com/web3','_blank');},600);return;}
+    okx.requestAccounts()
+      .then(function(a){if(a&&a[0])setWallet('okx',a[0]);else toast('&#128561; OKX: no accounts');})
+      .catch(function(e){toast('OKX: '+e.message);});
+  },200);
+}
+function setWallet(type,address){
+  ST.wallet={type:type,address:address};
+  var wb=document.getElementById('wb');
+  if(wb){
+    var ico={xverse:'&#128309;',unisat:'&#9889;',okx:'&#9632;'}[type]||'&#128081;';
+    wb.innerHTML=ico+' '+sa(address);
+    wb.style.background='rgba(247,147,26,0.12)';
+    wb.style.border='1.5px solid rgba(247,147,26,0.35)';
+    wb.style.color='var(--accent)';
+    wb.style.boxShadow='0 0 12px rgba(247,147,26,0.2)';
+    wb.onclick=function(){openAddr(address);};
+  }
+  toast('&#10024; Connected: '+sa(address));
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────────────────
+function doSearch(e){
+  if(e.key!=='Enter')return;
+  var q=(document.getElementById('sq')||{}).value;
+  if(!q)return;q=q.trim();
+  if(/^(bc1|1|3)/.test(q)&&q.length>20){openAddr(q);return;}
+  if(/^[0-9a-fA-F]{64}i\d+$/.test(q)){
+    var p={id:q,number:0,content_type:'',content_length:0,genesis_block_height:0,
+      genesis_timestamp:null,sat_rarity:'common',sat_name:'',address:'',value:546,
+      collection_name:'',collection_slug:'',title:'',parent:'',children:[],
+      preview:ORD+'/preview/'+q,content:ORD+'/content/'+q,genesis_tx:q.replace(/i\d+$/,'')};
+    ST.items=[p];ST.aux=[p];ST.sel=p;renderDetail(p);loadMeta(q);return;
+  }
+  if(/^\d+$/.test(q)&&q.length>10){lookupSat(q);return;}
+  if(/^\d+$/.test(q)&&parseInt(q)<=ST.blockH+10&&parseInt(q)>800000){
+    go('blocks');
+    setTimeout(function(){var bi=document.getElementById('blk-in');if(bi)bi.value=q;lookupBlkNum(parseInt(q));},150);
+    return;
+  }
+  if(/^\d+$/.test(q)){
+    toast('&#128269; Searching inscription #'+fn(parseInt(q))+'\u2026');
+    apiFetch(BIS+'/inscription/batch_info',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({queries:[parseInt(q)]})})
+      .then(function(d){
+        var item=nBIS((d.data||[])[0]);
+        if(item){ST.items=[item];ST.sel=item;renderDetail(item);}
+        else toast('&#128561; Inscription #'+q+' not found');
+      }).catch(function(){toast('&#128561; Search failed &mdash; try the full inscription ID');});
+  }
+}
+
+// ── URL PARAMS ────────────────────────────────────────────────────────────────
+function readUrlParams(){
+  try{var p=new URLSearchParams(window.location.search);var ct=p.get('content-type');if(ct)ST.contentType=ct;}catch(e){}
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+readUrlParams();
+renderHome();
+</script>
+</body>
+</html>
